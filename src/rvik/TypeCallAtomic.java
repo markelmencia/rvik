@@ -1,6 +1,6 @@
 package rvik;
 
-public class TypeCallAtomic {
+public class TypeCallAtomic extends Instruction {
 
 	private int[] csr12;
 	private int[] rs1;

@@ -1,34 +1,16 @@
 package rvik;
 
-public class TypeJ {
+public class TypeJ extends Instruction {
 
-	private int[] imm;
-	private int[] rs1;
-	private int[] funct3;
+	private int[] imm20;
 	private int[] rd;
 	
-	public int[] getImm() {
-		return imm;
+	public int[] getImm20() {
+		return imm20;
 	}
 	
-	public void setImm(int[] imm) {
-		this.imm = imm;
-	}
-	
-	public int[] getRs1() {
-		return rs1;
-	}
-	
-	public void setRs1(int[] rs1) {
-		this.rs1 = rs1;
-	}
-	
-	public int[] getFunct3() {
-		return funct3;
-	}
-	
-	public void setFunct3(int[] funct3) {
-		this.funct3 = funct3;
+	public void setImm20(int[] imm20) {
+		this.imm20 = imm20;
 	}
 	
 	public int[] getRd() {
@@ -39,21 +21,15 @@ public class TypeJ {
 		this.rd = rd;
 	}
 
-	public TypeJ(int[] imm, int[] rs1, int[] funct3, int[] rd) {
+	public TypeJ(int[] imm20, int[] rd) {
 		super();
-		this.imm = imm;
-		this.rs1 = rs1;
-		this.funct3 = funct3;
+		this.imm20 = imm20;
 		this.rd = rd;
 	}
 	
 	public TypeJ() {
 		super();
-		this.imm = new int[12];
-		this.rs1 = new int[5];
-		this.funct3 = new int[3];
+		this.imm20 = new int[20];
 		this.rd = new int[5];
-		
 	}
-	
 }

@@ -1,16 +1,16 @@
 package rvik;
 
-public class TypeAuipc {
+public class TypeAuipc extends Instruction {
 
-	private int[] imm;
+	private int[] imm20;
 	private int[] rd;
 	
-	public int[] getImm() {
-		return imm;
+	public int[] getImm20() {
+		return imm20;
 	}
 	
-	public void setImm(int[] imm) {
-		this.imm = imm;
+	public void setImm20(int[] imm20) {
+		this.imm20 = imm20;
 	}
 	
 	public int[] getRd() {
@@ -21,15 +21,15 @@ public class TypeAuipc {
 		this.rd = rd;
 	}
 
-	public TypeAuipc(int[] imm, int[] rd) {
+	public TypeAuipc(int[] imm20, int[] rd) {
 		super();
-		this.imm = imm;
+		this.imm20 = imm20;
 		this.rd = rd;
 	}
 	
 	public TypeAuipc() {
 		super();
-		this.imm = new int[20];
+		this.imm20 = new int[20];
 		this.rd = new int[5];
 	}
 

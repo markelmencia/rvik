@@ -1,6 +1,6 @@
 package rvik;
 
-public class TypeR {
+public class TypeR extends Instruction {
 
 	private int[] funct7;
 	private int[] rs1;

@@ -1,19 +1,19 @@
 package rvik;
 
-public class TypeS {
+public class TypeS extends Instruction {
 
-	private int[] imm7;
+	private int[] imm12;
 	private int[] rs2;
 	private int[] rs1;
 	private int[] funct3;
 	private int[] rd;
 	
-	public int[] getImm7() {
-		return imm7;
+	public int[] getImm12() {
+		return imm12;
 	}
 	
-	public void setImm7(int[] imm7) {
-		this.imm7 = imm7;
+	public void setImm12(int[] imm12) {
+		this.imm12 = imm12;
 	}
 	
 	public int[] getRs2() {
@@ -48,9 +48,9 @@ public class TypeS {
 		this.rd = rd;
 	}
 
-	public TypeS(int[] imm7, int[] rs2, int[] rs1, int[] funct3, int[] rd) {
+	public TypeS(int[] imm12, int[] rs2, int[] rs1, int[] funct3, int[] rd) {
 		super();
-		this.imm7 = imm7;
+		this.imm12 = imm12;
 		this.rs2 = rs2;
 		this.rs1 = rs1;
 		this.funct3 = funct3;
@@ -59,7 +59,7 @@ public class TypeS {
 	
 	public TypeS() {
 		super();
-		this.imm7 = new int[7];
+		this.imm12 = new int[7];
 		this.rs2 = new int[5];
 		this.rs1 = new int[5];
 		this.funct3 = new int[3];

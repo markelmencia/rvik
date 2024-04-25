@@ -1,6 +1,6 @@
 package rvik;
 
-public class TypeJalr {
+public class TypeJalr extends Instruction {
 
 	private int[] imm12;
 	private int[] rs1;
