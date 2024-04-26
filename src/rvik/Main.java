@@ -1,8 +1,21 @@
 package rvik;
 
 public class Main {
-
+	
+	public static int[] reg = new int[32];
+	public static int pc;
+	
+	public static int[] pm = new int[1000]; // Size TBD
+	public static int[] mem = new int[1000]; // Size TBD
+	
+//	public static ArrayList<Instruction> decodeInstrArray(ArrayList<Integer>) {
+//		
+//	}
+	
 	public static int[] fillSegment(int[] instr, int first, int last) {
+		
+		// Gets an instruction and a bit range and returns an array filtering out
+		// the rest of the instruction. Used in fillInstr() for simplicity purposes.
 		
 		int length = last - first + 1;
 		int[] result = new int[length];
@@ -16,9 +29,132 @@ public class Main {
 		return result;
 	}
 	
-	public static Instruction readCodeop(int[] instr) {
-		// Little endian
-		String codeop = "";
+	public static int[] sll(int[] segment) { // Shift amount not done yet
+		int[] result = new int[32];
+		
+		int j = 31;
+		for (int i = segment.length - 1; i >= 0; i--) {
+			result[j] = segment[i]; 
+			j--;
+		}
+		for (int i = 11; i >= 0; i++) {
+			result[j] = 0;
+		}
+		
+		return result;
+	}
+	
+	public static String segmentToString(int[] segment) {
+		
+		// Returns a string with the segment value in binary.
+		// Used for convenience in runInstruction()
+		
+		String result = "";
+		for (int i = 0; i < segment.length; i++) {
+			result = result + Integer.toString(segment[i]);
+		}
+		return result;
+	}
+	
+	public static int btiu(int[] segment, int length) {
+		
+		// Binary to int unsigned.
+		
+		int result = 0;
+
+		for (int i = 0; i < length; i++) {
+			if (segment[i] == 1) {
+				result += 1 * Math.pow(2,i);
+			}
+		}
+		return result;
+	}
+	
+	public static int btis(int[] segment, int length) {
+		
+		// Binary to int signed.
+		
+		int result = 0;
+		
+		if (segment[length - 1] == 0) {
+		
+			for (int i = 0; i < length - 1; i++) {
+				if (segment[i] == 1) {
+					result += 1 + Math.pow(2, i);
+				}
+			}
+		}
+			
+		if (segment[length - 1] == 1) {
+			
+			for (int i = 0; i < length - 1; i++) {
+				if (segment[i] == 0) {
+					result += 1 + Math.pow(2, i);
+				}
+			}
+			result++;
+			result = 0 - result;
+		}
+		return result;
+		
+	}
+	
+	public static void runInstruction(int[] instr) {
+		
+		// Runs the given instruction.
+		
+		Instruction instruction = getInstrType(instr);
+		if (instruction instanceof TypeLui) {
+			reg[btiu(((TypeLui) instruction).getRd(), 5)] = btiu(sll(((TypeLui) instruction).getImm20()), 32) ; 
+		}
+		
+		if (instruction instanceof TypeAuipc) {
+			
+		}
+		
+		if (instruction instanceof TypeJ) {
+			
+		}
+		
+		if (instruction instanceof TypeJalr) {
+			
+		}
+		
+		if (instruction instanceof TypeB) {
+			
+		}
+		
+		if (instruction instanceof TypeLoad) {
+			
+		}
+		
+		if (instruction instanceof TypeS) {
+			
+		}
+		
+		if (instruction instanceof TypeImm) {
+			
+		}
+		
+		if (instruction instanceof TypeR) {
+			if (segmentToString(((TypeR) instruction).getFunct3()).equals("000")) {
+				reg[btiu(instr, 5)] = reg[btiu(((TypeR) instruction).getRs1(), 5)] + reg[btiu(((TypeR) instruction).getRs1(), 5)]; //
+				pc = pc + 4; // pc <- pc + 4
+			}
+		}
+		
+		if (instruction instanceof TypeCallAtomic) {
+			
+		}
+		
+	}
+	
+	public static Instruction getInstrType(int[] instr) {
+		
+		// Returns the specific instruction object (its type)
+		// via the given instruction's code operation.
+		
+		String codeop = ""; // Little endian
 		Instruction result = null;
 		for (int i = 0; i < 7; i++) {
 			codeop += Integer.toString(instr[i]);
@@ -68,6 +204,9 @@ public class Main {
 	}
 	
 	public static void fillInstr(int[] instr, Instruction instruction) {
+		
+		// Fills in the attributes of an instruction according to its 
+		// instruction type.
 		
 		if (instruction instanceof TypeLui) {
 			
@@ -142,6 +281,13 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-	
+		int[] test = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
+		int[] result = sll(test);
+		
+		for (int i = 0; i < 32; i++) {
+			System.out.println(result[i]);
+		}
+		
+		
 	}
 }
