@@ -1,2 +1,2 @@
 # rvik
-An RV32i Simulator programmed in Java.
+An RV32i simulator programmed in Java.
