@@ -8,10 +8,6 @@ public class Main {
 	public static int[] pm = new int[1000]; // Size TBD
 	public static int[] mem = new int[1000]; // Size TBD
 	
-//	public static ArrayList<Instruction> decodeInstrArray(ArrayList<Integer>) {
-//		
-//	}
-	
 	public static int[] fillSegment(int[] instr, int first, int last) {
 		
 		// Gets an instruction and a bit range and returns an array filtering out
@@ -29,18 +25,12 @@ public class Main {
 		return result;
 	}
 	
-	public static int[] sll(int[] segment) { // Shift amount not done yet
-		int[] result = new int[32];
+	public static int[] bitExpansion(int[] segment, int resultBits) {
+		int[] result = new int[resultBits];
 		
-		int j = 31;
-		for (int i = segment.length - 1; i >= 0; i--) {
-			result[j] = segment[i]; 
-			j--;
+		for (int i = 0; i < segment.length; i++) {
+			result[i] = segment[i];
 		}
-		for (int i = 11; i >= 0; i++) {
-			result[j] = 0;
-		}
-		
 		return result;
 	}
 	
@@ -56,13 +46,13 @@ public class Main {
 		return result;
 	}
 	
-	public static int btiu(int[] segment, int length) {
+	public static int btiu(int[] segment) {
 		
 		// Binary to int unsigned.
 		
 		int result = 0;
 
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < segment.length; i++) {
 			if (segment[i] == 1) {
 				result += 1 * Math.pow(2,i);
 			}
@@ -70,24 +60,24 @@ public class Main {
 		return result;
 	}
 	
-	public static int btis(int[] segment, int length) {
+	public static int btis(int[] segment) {
 		
 		// Binary to int signed.
 		
 		int result = 0;
 		
-		if (segment[length - 1] == 0) {
+		if (segment[segment.length - 1] == 0) {
 		
-			for (int i = 0; i < length - 1; i++) {
+			for (int i = 0; i < segment.length - 1; i++) {
 				if (segment[i] == 1) {
 					result += 1 + Math.pow(2, i);
 				}
 			}
 		}
 			
-		if (segment[length - 1] == 1) {
+		if (segment[segment.length - 1] == 1) {
 			
-			for (int i = 0; i < length - 1; i++) {
+			for (int i = 0; i < segment.length - 1; i++) {
 				if (segment[i] == 0) {
 					result += 1 + Math.pow(2, i);
 				}
@@ -104,24 +94,85 @@ public class Main {
 		// Runs the given instruction.
 		
 		Instruction instruction = getInstrType(instr);
+		
 		if (instruction instanceof TypeLui) {
-			reg[btiu(((TypeLui) instruction).getRd(), 5)] = btiu(sll(((TypeLui) instruction).getImm20()), 32) ; 
+			TypeLui typeLui = (TypeLui) instruction;
+			
+			reg[btiu(((TypeLui) instruction).getRd())] = btis(bitExpansion(typeLui.getImm20(), 32)) << 12; // rd <- imm_u
+			pc = pc + 4; // pc <- pc + 4
 		}
 		
 		if (instruction instanceof TypeAuipc) {
+			TypeAuipc typeAuipc = (TypeAuipc) instruction;
 			
+			reg[btiu(((TypeLui) instruction).getRd())] = pc + btis(bitExpansion(typeAuipc.getImm20(), 32)) << 12;; // rd <- pc + imm_u
+			pc = pc + 4; // pc <- pc + 4
 		}
 		
 		if (instruction instanceof TypeJ) {
+			TypeJ typeJ = (TypeJ) instruction;
 			
+			reg[btiu(typeJ.getRd())] = pc + 4; // rd <- pc + 4
+			pc = pc + btis(typeJ.getImm20()); // pc <- pc + imm_j
 		}
 		
 		if (instruction instanceof TypeJalr) {
+			TypeJalr typeJalr = (TypeJalr) instruction;
 			
+			reg[btiu(typeJalr.getRd())] = pc + 4; // rd <- pc + 4
+			pc = reg[btiu(typeJalr.getRs1())] + btis(typeJalr.getImm12()); // pc < rs1 + imm_i
 		}
 		
 		if (instruction instanceof TypeB) {
+			TypeB typeB = (TypeB) instruction;
 			
+			if (segmentToString(typeB.getFunct3()).equals("000")){ // This condition is better checked with btiu probably
+				if (reg[btiu(typeB.getRs1())] == reg[btiu(typeB.getRs2())]) {
+					pc = pc + btis(typeB.getImm12());
+				} else {
+					pc = pc + 4;
+				}
+			}
+			
+			if (segmentToString(typeB.getFunct3()).equals("001")) { // This condition is better checked with btiu probably
+				if (reg[btiu(typeB.getRs1())] != reg[btiu(typeB.getRs2())]) {
+					pc = pc + btis(typeB.getImm12());
+				} else {
+					pc = pc + 4;
+				}
+			}
+			
+			if (segmentToString(typeB.getFunct3()).equals("100")) { // This condition is better checked with btiu probably
+				if (reg[btiu(typeB.getRs1())] < reg[btiu(typeB.getRs2())]) {
+					pc = pc + btis(typeB.getImm12());
+				} else {
+					pc = pc + 4;
+				}
+			}
+			
+			if (segmentToString(typeB.getFunct3()).equals("101")) { // This condition is better checked with btiu probably
+				if (reg[btiu(typeB.getRs1())] >= reg[btiu(typeB.getRs2())]) {
+					pc = pc + btis(typeB.getImm12());
+				} else {
+					pc = pc + 4;
+				}
+			}
+			
+			if (segmentToString(typeB.getFunct3()).equals("110")) { // This condition is better checked with btiu probably
+				if (Math.abs(reg[btiu(((TypeB) instruction).getRs1())]) < Math.abs(reg[btiu(((TypeB) instruction).getRs2())])) {
+					pc = pc + btis(typeB.getImm12());
+				} else {
+					pc = pc + 4;
+				}
+			}
+			
+			if (segmentToString(typeB.getFunct3()).equals("111")) { // This condition is better checked with btiu probably
+				if (Math.abs(reg[btiu(((TypeB) instruction).getRs1())]) >= Math.abs(reg[btiu(((TypeB) instruction).getRs2())])) {
+					pc = pc + btis(typeB.getImm12());
+				} else {
+					pc = pc + 4;
+				}
+			}
 		}
 		
 		if (instruction instanceof TypeLoad) {
@@ -133,18 +184,128 @@ public class Main {
 		}
 		
 		if (instruction instanceof TypeImm) {
+			TypeImm typeImm = (TypeImm) instruction;
+			
+			if (segmentToString(typeImm.getFunct3()).equals("000")) {
+				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] + btis(typeImm.getImm12()); // rd <- rs1 + imm12
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeImm.getFunct3()).equals("010")) {
+				if (reg[btiu(typeImm.getRs1())] < btis(typeImm.getImm12())) {
+					reg[btiu(typeImm.getRd())] = 1;
+				} else {
+					reg[btiu(typeImm.getRd())] = 0;
+				}
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeImm.getFunct3()).equals("011")) {
+				if (Math.abs(reg[btiu(typeImm.getRs1())]) < Math.abs(btis(typeImm.getImm12()))) {
+					reg[btiu(typeImm.getRd())] = 1;
+				} else {
+					reg[btiu(typeImm.getRd())] = 0;
+				}
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeImm.getFunct3()).equals("100")) {
+				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] ^ btis(typeImm.getImm12());
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeImm.getFunct3()).equals("110")) {
+				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] | btis(typeImm.getImm12());
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeImm.getFunct3()).equals("111")) {
+				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] & btis(typeImm.getImm12());
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeImm.getFunct3()).equals("001")) {
+				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] << btis(typeImm.getImm12());
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeImm.getFunct3()).equals("101")) {
+				if (instr[30] == 1) {
+					reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] >>> btis(typeImm.getImm12());
+				} else {
+					reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] >> btis(typeImm.getImm12());
+				}
+				pc = pc + 4;
+			}
 			
 		}
 		
 		if (instruction instanceof TypeR) {
-			if (segmentToString(((TypeR) instruction).getFunct3()).equals("000")) {
-				reg[btiu(instr, 5)] = reg[btiu(((TypeR) instruction).getRs1(), 5)] + reg[btiu(((TypeR) instruction).getRs1(), 5)]; //
-				pc = pc + 4; // pc <- pc + 4
+			TypeR typeR = (TypeR) instruction;
+			
+			if (segmentToString(typeR.getFunct3()).equals("000")) {
+				if (instr[30] == 0) {
+					reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] + reg[btiu(typeR.getRs2())];
+				}
+				
+				if (instr[30] == 1) {
+					reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] - reg[btiu(typeR.getRs2())];
+				}
+				pc = pc + 4;
 			}
+			
+			if (segmentToString(typeR.getFunct3()).equals("001")) {
+				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] << reg[btiu(typeR.getRs2())];
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeR.getFunct3()).equals("010")) {
+				if (reg[btiu(typeR.getRs1())] < reg[btiu(typeR.getRs2())]) {
+					reg[btiu(typeR.getRd())] = 1;
+				} else {
+					reg[btiu(typeR.getRd())] = 0;
+				}
+				pc = pc + 4;	
+			}
+			
+			if (segmentToString(typeR.getFunct3()).equals("011")) {
+				if (Math.abs(reg[btiu(typeR.getRs1())]) < Math.abs(reg[btiu(typeR.getRs2())])) {
+					reg[btiu(typeR.getRd())] = 1;
+				} else {
+					reg[btiu(typeR.getRd())] = 0;
+				}
+				pc = pc + 4;		
+			}
+			
+			if (segmentToString(typeR.getFunct3()).equals("100")) {
+				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] ^ reg[btiu(typeR.getRs2())];
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeR.getFunct3()).equals("101")) {
+				if (instr[30] == 0) {
+					reg[btiu(typeR.getFunct3())] = reg[btiu(typeR.getRs1())] >>> reg[btiu(typeR.getRs2())];
+				}
+				
+				if (instr[30] == 1) {
+					reg[btiu(typeR.getFunct3())] = reg[btiu(typeR.getRs1())] >> reg[btiu(typeR.getRs2())];
+				}
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeR.getFunct3()).equals("110")) {
+				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] | reg[btiu(typeR.getRs2())];
+				pc = pc + 4;
+			}
+			
+			if (segmentToString(typeR.getFunct3()).equals("111")) {
+				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] & reg[btiu(typeR.getRs2())];
+				pc = pc + 4;
+			}	
 		}
 		
 		if (instruction instanceof TypeCallAtomic) {
-			
+			TypeCallAtomic typeCallAtomic = (TypeCallAtomic) instruction;
 		}
 		
 	}
@@ -209,33 +370,41 @@ public class Main {
 		// instruction type.
 		
 		if (instruction instanceof TypeLui) {
+			TypeLui typeLui = (TypeLui) instruction;
 			
-			((TypeLui) instruction).setImm20(fillSegment(instr, 12, 31));
-			((TypeLui) instruction).setRd(fillSegment(instr, 7, 11));
+			typeLui.setImm20(fillSegment(instr, 12, 31));
+			typeLui.setRd(fillSegment(instr, 7, 11));
 		}
 		
 		if (instruction instanceof TypeAuipc) {
-			((TypeAuipc) instruction).setImm20(fillSegment(instr, 12, 31));
-			((TypeAuipc) instruction).setRd(fillSegment(instr, 7, 11));
+			TypeAuipc typeAuipc = (TypeAuipc) instruction;
+			
+			typeAuipc.setImm20(fillSegment(instr, 12, 31));
+			typeAuipc.setRd(fillSegment(instr, 7, 11));
 		}
 		
 		if (instruction instanceof TypeJ) {
 			int[] jImm20 = {instr[21], instr[22], instr[23], instr[24], instr[25], instr[26], instr[27], instr[28], instr[29], instr[30], instr[20], instr[12], instr[13], instr[14], instr[15], instr[16], instr[17], instr[18], instr[19], instr[31] };
+			TypeJ typeJ = (TypeJ) instruction;
 			
-			((TypeJ) instruction).setImm20(jImm20);
-			((TypeJ) instruction).setRd(fillSegment(instr, 7, 11));
+			typeJ.setImm20(jImm20);
+			typeJ.setRd(fillSegment(instr, 7, 11));
 		}
 		
 		if (instruction instanceof TypeJalr) {
-			((TypeJalr) instruction).setImm12(fillSegment(instr, 20, 31));
-			((TypeJalr) instruction).setRs1(fillSegment(instr, 15, 19));
-			((TypeJalr) instruction).setFunct3(fillSegment(instr, 12, 14));
-			((TypeJalr) instruction).setRd(fillSegment(instr, 11, 7));
+			TypeJalr typeJalr = (TypeJalr) instruction;
+			
+			typeJalr.setImm12(fillSegment(instr, 20, 31));
+			typeJalr.setRs1(fillSegment(instr, 15, 19));
+			typeJalr.setFunct3(fillSegment(instr, 12, 14));
+			typeJalr.setRd(fillSegment(instr, 11, 7));
 		}
 		
 		if (instruction instanceof TypeB) {
 			int [] bImm12 = {instr[8], instr[9], instr[10], instr[11], instr[25], instr[26], instr[27], instr[28], instr[29], instr[30], instr[7], instr[31]};
-			((TypeB) instruction).setImm12(bImm12);
+			TypeB typeB = (TypeB) instruction;
+			
+			typeB.setImm12(bImm12);
 			((TypeB) instruction).setRs2(fillSegment(instr, 20, 24));
 			((TypeB) instruction).setRs1(fillSegment(instr, 15, 19));
 			((TypeB) instruction).setFunct3(fillSegment(instr, 12, 14));
@@ -281,13 +450,6 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		int[] test = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
-		int[] result = sll(test);
-		
-		for (int i = 0; i < 32; i++) {
-			System.out.println(result[i]);
-		}
-		
-		
+		// Check that btiu and btis work without length argument
 	}
 }
