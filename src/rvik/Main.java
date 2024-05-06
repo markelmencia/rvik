@@ -8,6 +8,51 @@ public class Main {
 	public static int[] pm = new int[1000]; // Size TBD
 	public static int[] mem = new int[1000]; // Size TBD
 	
+	// MEMORY RELATED METHODS
+	
+	public static int[] getInstr() {
+		int[] result = new int[32];
+		int start = pc;
+		int finish = pc + 32;
+		
+		int j = 0;
+		for (int i = start; i < finish; i++) {
+			result[j] = mem[i];
+			j++;
+		}
+		
+		return result;
+	}
+
+	public static int[] loadMem(int address, int size) {
+		int[] result = new int[size];
+		int start = address;
+		int finish = address + size;
+		
+		int j = 0;
+		for (int i = start; i < finish; i++) {
+			result[j] = mem[i];
+			j++;
+		}
+		return result;
+	}
+	
+	
+	public static void storeMem(int[] segment, int address) {
+		int start = address;
+		int finish = address + segment.length;
+		
+		int j = 0;
+		for (int i = start; i < finish; i++) {
+			mem[i] = segment[j];
+		}
+	}
+		
+	
+	public static void run() {
+		
+	}
+	
 	public static int[] fillSegment(int[] instr, int first, int last) {
 		
 		// Gets an instruction and a bit range and returns an array filtering out
@@ -88,6 +133,25 @@ public class Main {
 		return result;
 		
 	}
+
+	
+	public static int[] getReg(int regIndex, int size) {
+		String binary = Integer.toBinaryString(reg[regIndex]);
+		int[] segment = new int[32];
+		for (int i = 0; i < binary.length(); i++) {
+			if (binary.charAt(i) == '1') {
+				segment[binary.length() - 1 - i] = 1;
+			} else {
+				segment[binary.length() - 1 - i] = 0;
+			}
+		}
+		
+		int result[] = new int[size];
+		for (int i = 0; i < size; i++) {
+			result[i] = segment[i];
+		}
+		return result;
+	}
 	
 	public static void runInstruction(int[] instr) {
 		
@@ -99,143 +163,183 @@ public class Main {
 			TypeLui typeLui = (TypeLui) instruction;
 			
 			reg[btiu(((TypeLui) instruction).getRd())] = btis(bitExpansion(typeLui.getImm20(), 32)) << 12; // rd <- imm_u
-			pc = pc + 4; // pc <- pc + 4
+			pc = pc + 16; // pc <- pc + 4
 		}
 		
 		if (instruction instanceof TypeAuipc) {
 			TypeAuipc typeAuipc = (TypeAuipc) instruction;
 			
 			reg[btiu(((TypeLui) instruction).getRd())] = pc + btis(bitExpansion(typeAuipc.getImm20(), 32)) << 12;; // rd <- pc + imm_u
-			pc = pc + 4; // pc <- pc + 4
+			pc = pc + 16; // pc <- pc + 4
 		}
 		
 		if (instruction instanceof TypeJ) {
 			TypeJ typeJ = (TypeJ) instruction;
 			
-			reg[btiu(typeJ.getRd())] = pc + 4; // rd <- pc + 4
+			reg[btiu(typeJ.getRd())] = pc + 16; // rd <- pc + 4
 			pc = pc + btis(typeJ.getImm20()); // pc <- pc + imm_j
 		}
 		
 		if (instruction instanceof TypeJalr) {
 			TypeJalr typeJalr = (TypeJalr) instruction;
 			
-			reg[btiu(typeJalr.getRd())] = pc + 4; // rd <- pc + 4
+			reg[btiu(typeJalr.getRd())] = pc + 16; // rd <- pc + 4
 			pc = reg[btiu(typeJalr.getRs1())] + btis(typeJalr.getImm12()); // pc < rs1 + imm_i
 		}
 		
 		if (instruction instanceof TypeB) {
 			TypeB typeB = (TypeB) instruction;
 			
-			if (segmentToString(typeB.getFunct3()).equals("000")){ // This condition is better checked with btiu probably
+			if (btiu(typeB.getFunct3()) == 0) { // beq
 				if (reg[btiu(typeB.getRs1())] == reg[btiu(typeB.getRs2())]) {
 					pc = pc + btis(typeB.getImm12());
 				} else {
-					pc = pc + 4;
+					pc = pc + 16;
 				}
 			}
 			
-			if (segmentToString(typeB.getFunct3()).equals("001")) { // This condition is better checked with btiu probably
+			if (btiu(typeB.getFunct3()) == 1) { // bne
 				if (reg[btiu(typeB.getRs1())] != reg[btiu(typeB.getRs2())]) {
 					pc = pc + btis(typeB.getImm12());
 				} else {
-					pc = pc + 4;
+					pc = pc + 16;
 				}
 			}
 			
-			if (segmentToString(typeB.getFunct3()).equals("100")) { // This condition is better checked with btiu probably
+			if (btiu(typeB.getFunct3()) == 4) { // blt
 				if (reg[btiu(typeB.getRs1())] < reg[btiu(typeB.getRs2())]) {
 					pc = pc + btis(typeB.getImm12());
 				} else {
-					pc = pc + 4;
+					pc = pc + 16;
 				}
 			}
 			
-			if (segmentToString(typeB.getFunct3()).equals("101")) { // This condition is better checked with btiu probably
+			if (btiu(typeB.getFunct3()) == 5) { // bge
 				if (reg[btiu(typeB.getRs1())] >= reg[btiu(typeB.getRs2())]) {
 					pc = pc + btis(typeB.getImm12());
 				} else {
-					pc = pc + 4;
+					pc = pc + 16;
 				}
 			}
 			
-			if (segmentToString(typeB.getFunct3()).equals("110")) { // This condition is better checked with btiu probably
+			if (btiu(typeB.getFunct3()) == 6) { // btlu
 				if (Math.abs(reg[btiu(((TypeB) instruction).getRs1())]) < Math.abs(reg[btiu(((TypeB) instruction).getRs2())])) {
 					pc = pc + btis(typeB.getImm12());
 				} else {
-					pc = pc + 4;
+					pc = pc + 16;
 				}
 			}
 			
-			if (segmentToString(typeB.getFunct3()).equals("111")) { // This condition is better checked with btiu probably
+			if (btiu(typeB.getFunct3()) == 7) { // bgeu
 				if (Math.abs(reg[btiu(((TypeB) instruction).getRs1())]) >= Math.abs(reg[btiu(((TypeB) instruction).getRs2())])) {
 					pc = pc + btis(typeB.getImm12());
 				} else {
-					pc = pc + 4;
+					pc = pc + 16;
 				}
 			}
 		}
 		
 		if (instruction instanceof TypeLoad) {
+			TypeLoad typeLoad = (TypeLoad) instruction;
 			
+			if (btiu(typeLoad.getFunct3()) == 0) { // lb
+				reg[btiu(typeLoad.getRd())] = btis(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12())), 8));
+				pc = pc + 16;
+			}
+			
+			if (btiu(typeLoad.getFunct3()) == 1) { // lh
+				reg[btiu(typeLoad.getRd())] = btis(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12())), 16));
+				pc = pc + 16;
+			}
+			
+			if (btiu(typeLoad.getFunct3()) == 2) { // lw
+				reg[btiu(typeLoad.getRd())] = btis(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12())), 32));
+				pc = pc + 16;
+			}
+			
+			if (btiu(typeLoad.getFunct3()) == 4) { // lbu
+				reg[btiu(typeLoad.getRd())] = btiu(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12())), 8));
+				pc = pc + 16;
+			}
+			
+			if (btiu(typeLoad.getFunct3()) == 5) { // lhu
+				reg[btiu(typeLoad.getRd())] = btiu(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12())), 16));
+				pc = pc + 16;
+			}
 		}
 		
 		if (instruction instanceof TypeS) {
+			TypeS typeS = (TypeS) instruction;
 			
+			if (btiu(typeS.getFunct3()) == 0) { // sb
+				storeMem(getReg(btiu(typeS.getRs2()), 8), reg[btiu(typeS.getRs1())] + btis(typeS.getImm12()));
+				pc = pc + 16;
+			}
+			
+			if (btiu(typeS.getFunct3()) == 1) { // sh
+				storeMem(getReg(btiu(typeS.getRs2()), 16), reg[btiu(typeS.getRs1())] + btis(typeS.getImm12()));
+				pc = pc + 16;
+			}
+			
+			if (btiu(typeS.getFunct3()) == 2) { // sw
+				storeMem(getReg(btiu(typeS.getRs2()), 32), reg[btiu(typeS.getRs1())] + btis(typeS.getImm12()));
+				pc = pc + 16;
+			}
 		}
 		
 		if (instruction instanceof TypeImm) {
 			TypeImm typeImm = (TypeImm) instruction;
 			
-			if (segmentToString(typeImm.getFunct3()).equals("000")) {
+			if (btiu(typeImm.getFunct3()) == 0) { // addi
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] + btis(typeImm.getImm12()); // rd <- rs1 + imm12
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeImm.getFunct3()).equals("010")) {
+			if (btiu(typeImm.getFunct3()) == 2) { // slti
 				if (reg[btiu(typeImm.getRs1())] < btis(typeImm.getImm12())) {
 					reg[btiu(typeImm.getRd())] = 1;
 				} else {
 					reg[btiu(typeImm.getRd())] = 0;
 				}
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeImm.getFunct3()).equals("011")) {
+			if (btiu(typeImm.getFunct3()) == 3) { // sltiu
 				if (Math.abs(reg[btiu(typeImm.getRs1())]) < Math.abs(btis(typeImm.getImm12()))) {
 					reg[btiu(typeImm.getRd())] = 1;
 				} else {
 					reg[btiu(typeImm.getRd())] = 0;
 				}
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeImm.getFunct3()).equals("100")) {
+			if (btiu(typeImm.getFunct3()) == 4) { // xori
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] ^ btis(typeImm.getImm12());
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeImm.getFunct3()).equals("110")) {
+			if (btiu(typeImm.getFunct3()) == 6) { // ori
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] | btis(typeImm.getImm12());
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeImm.getFunct3()).equals("111")) {
+			if (btiu(typeImm.getFunct3()) == 7) { // andi
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] & btis(typeImm.getImm12());
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeImm.getFunct3()).equals("001")) {
+			if (btiu(typeImm.getFunct3()) == 1) { // slli
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] << btis(typeImm.getImm12());
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeImm.getFunct3()).equals("101")) {
-				if (instr[30] == 1) {
+			if (btiu(typeImm.getFunct3()) == 5) { // srli / srai
+				if (instr[30] == 1) { // srli
 					reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] >>> btis(typeImm.getImm12());
-				} else {
+				} else { // srai
 					reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] >> btis(typeImm.getImm12());
 				}
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
 		}
@@ -243,64 +347,64 @@ public class Main {
 		if (instruction instanceof TypeR) {
 			TypeR typeR = (TypeR) instruction;
 			
-			if (segmentToString(typeR.getFunct3()).equals("000")) {
-				if (instr[30] == 0) {
+			if (btiu(typeR.getFunct3()) == 0) { // add / sub
+				if (instr[30] == 0) { // add
 					reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] + reg[btiu(typeR.getRs2())];
 				}
 				
-				if (instr[30] == 1) {
+				if (instr[30] == 1) { // sub
 					reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] - reg[btiu(typeR.getRs2())];
 				}
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeR.getFunct3()).equals("001")) {
+			if (btiu(typeR.getFunct3()) == 1) { // sll
 				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] << reg[btiu(typeR.getRs2())];
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeR.getFunct3()).equals("010")) {
+			if (btiu(typeR.getFunct3()) == 2) { // slt
 				if (reg[btiu(typeR.getRs1())] < reg[btiu(typeR.getRs2())]) {
 					reg[btiu(typeR.getRd())] = 1;
 				} else {
 					reg[btiu(typeR.getRd())] = 0;
 				}
-				pc = pc + 4;	
+				pc = pc + 16;	
 			}
 			
-			if (segmentToString(typeR.getFunct3()).equals("011")) {
+			if (btiu(typeR.getFunct3()) == 3) { // sltu
 				if (Math.abs(reg[btiu(typeR.getRs1())]) < Math.abs(reg[btiu(typeR.getRs2())])) {
 					reg[btiu(typeR.getRd())] = 1;
 				} else {
 					reg[btiu(typeR.getRd())] = 0;
 				}
-				pc = pc + 4;		
+				pc = pc + 16;		
 			}
 			
-			if (segmentToString(typeR.getFunct3()).equals("100")) {
+			if (btiu(typeR.getFunct3()) == 4) { // xor
 				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] ^ reg[btiu(typeR.getRs2())];
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeR.getFunct3()).equals("101")) {
-				if (instr[30] == 0) {
+			if (btiu(typeR.getFunct3()) == 5) { // srl / sra
+				if (instr[30] == 0) { // srl
 					reg[btiu(typeR.getFunct3())] = reg[btiu(typeR.getRs1())] >>> reg[btiu(typeR.getRs2())];
 				}
 				
-				if (instr[30] == 1) {
+				if (instr[30] == 1) { // sra
 					reg[btiu(typeR.getFunct3())] = reg[btiu(typeR.getRs1())] >> reg[btiu(typeR.getRs2())];
 				}
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeR.getFunct3()).equals("110")) {
+			if (btiu(typeR.getFunct3()) == 6) { // or
 				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] | reg[btiu(typeR.getRs2())];
-				pc = pc + 4;
+				pc = pc + 16;
 			}
 			
-			if (segmentToString(typeR.getFunct3()).equals("111")) {
+			if (btiu(typeR.getFunct3()) == 7) { // and
 				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] & reg[btiu(typeR.getRs2())];
-				pc = pc + 4;
+				pc = pc + 16;
 			}	
 		}
 		
@@ -450,6 +554,10 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		// Check that btiu and btis work without length argument
+		reg[2] = 10;
+		int[] test = getReg(2, 3);
+		for (int i = 0; i < test.length; i++) {
+			System.out.println(test[i]);
+		}
 	}
 }
