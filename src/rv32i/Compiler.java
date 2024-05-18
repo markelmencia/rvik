@@ -60,10 +60,10 @@ import instructions.*;
 public class Compiler {
 
 	public static int[] reg = new int[32];
-	public static int pc;
+	public static int pc = 0;
 	
-	public static BitSet pm = new BitSet(1000); // Size TBD
-	public static BitSet mem = new BitSet(1000); // Size TBD
+	public static BitSet pm = new BitSet(65536); // Size TBD
+	public static BitSet mem = new BitSet(65536); // Size TBD
 	
 	// MEMORY RELATED METHODS
 	
@@ -85,7 +85,7 @@ public class Compiler {
 		BitSet result = new BitSet(size);
 		int start = address;
 		int finish = address + size;
-		
+
 		int j = 0;
 		for (int i = start; i < finish; i++) {
 			result.set(j, mem.get(i));
@@ -106,12 +106,29 @@ public class Compiler {
 		}
 	}
 		
+	public static boolean instructionIsEmpty(BitSet instructionArray) {
+		for (int i = 0; i < 32; i++) {
+			if (instructionArray.get(i)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
 	
 	public static void run() {
 		BitSet instructionArray = getInstr();
-		Instruction instruction = getInstrType(instructionArray);
-		fillInstr(instructionArray, instruction);
-		runInstruction(instruction);
+		Instruction instruction;
+		
+		
+		while(!instructionIsEmpty(instructionArray)) {
+
+			instruction = getInstrType(instructionArray);
+			fillInstr(instructionArray, instruction);
+			runInstruction(instruction);
+			reg[0] = 0;
+			instructionArray = getInstr();
+		}
 	}
 	
 	// COMPILER FUNCTIONALITY FUNCTIONS
@@ -212,14 +229,14 @@ public class Compiler {
 			TypeLui typeLui = (TypeLui) instruction;
 			
 			reg[btiu(((TypeLui) instruction).getRd())] = btis(bitExtension(typeLui.getImm20(), 32), 32) << 12; // rd <- imm_u
-			pc = pc + 16; // pc <- pc + 16
+			pc = pc + 32; // pc <- pc + 16
 		}
 		
 		if (instruction instanceof TypeAuipc) {
 			TypeAuipc typeAuipc = (TypeAuipc) instruction;
 			
 			reg[btiu(((TypeAuipc) instruction).getRd())] = pc + btis(bitExtension(typeAuipc.getImm20(), 32), 32) << 12;; // rd <- pc + imm_u
-			pc = pc + 16; // pc <- pc + 16
+			pc = pc + 32; // pc <- pc + 16
 		}
 		
 		if (instruction instanceof TypeJ) {
@@ -232,7 +249,7 @@ public class Compiler {
 		if (instruction instanceof TypeJalr) {
 			TypeJalr typeJalr = (TypeJalr) instruction;
 			
-			reg[btiu(typeJalr.getRd())] = pc + 16; // rd <- pc + 16
+			reg[btiu(typeJalr.getRd())] = pc + 32; // rd <- pc + 16
 			pc = reg[btiu(typeJalr.getRs1())] + btis(typeJalr.getImm12(), 12); // pc < rs1 + imm_i
 		}
 		
@@ -243,7 +260,7 @@ public class Compiler {
 				if (reg[btiu(typeB.getRs1())] == reg[btiu(typeB.getRs2())]) {
 					pc = pc + btis(typeB.getImm13(), 13);
 				} else {
-					pc = pc + 16;
+					pc = pc + 32;
 				}
 			}
 			
@@ -251,7 +268,7 @@ public class Compiler {
 				if (reg[btiu(typeB.getRs1())] != reg[btiu(typeB.getRs2())]) {
 					pc = pc + btis(typeB.getImm13(), 13);
 				} else {
-					pc = pc + 16;
+					pc = pc + 32;
 				}
 			}
 			
@@ -259,15 +276,16 @@ public class Compiler {
 				if (reg[btiu(typeB.getRs1())] < reg[btiu(typeB.getRs2())]) {
 					pc = pc + btis(typeB.getImm13(), 13);
 				} else {
-					pc = pc + 16;
+					pc = pc + 32;
 				}
 			}
 			
 			if (btiu(typeB.getFunct3()) == 5) { // bge
+				
 				if (reg[btiu(typeB.getRs1())] >= reg[btiu(typeB.getRs2())]) {
 					pc = pc + btis(typeB.getImm13(), 13);
 				} else {
-					pc = pc + 16;
+					pc = pc + 32;
 				}
 			}
 			
@@ -275,7 +293,7 @@ public class Compiler {
 				if (Math.abs(reg[btiu(((TypeB) instruction).getRs1())]) < Math.abs(reg[btiu(((TypeB) instruction).getRs2())])) {
 					pc = pc + btis(typeB.getImm13(), 13);
 				} else {
-					pc = pc + 16;
+					pc = pc + 32;
 				}
 			}
 			
@@ -283,7 +301,7 @@ public class Compiler {
 				if (Math.abs(reg[btiu(((TypeB) instruction).getRs1())]) >= Math.abs(reg[btiu(((TypeB) instruction).getRs2())])) {
 					pc = pc + btis(typeB.getImm13(), 13);
 				} else {
-					pc = pc + 16;
+					pc = pc + 32;
 				}
 			}
 		}
@@ -293,27 +311,27 @@ public class Compiler {
 			
 			if (btiu(typeLoad.getFunct3()) == 0) { // lb
 				reg[btiu(typeLoad.getRd())] = btis(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12(), 12)), 8), 8);
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeLoad.getFunct3()) == 1) { // lh
 				reg[btiu(typeLoad.getRd())] = btis(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12(), 12)), 16), 16);
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeLoad.getFunct3()) == 2) { // lw
 				reg[btiu(typeLoad.getRd())] = btis(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12(), 12)), 32), 32);
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeLoad.getFunct3()) == 4) { // lbu
 				reg[btiu(typeLoad.getRd())] = btiu(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12(), 8)), 8));
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeLoad.getFunct3()) == 5) { // lhu
 				reg[btiu(typeLoad.getRd())] = btiu(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12(), 12)), 16));
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 		}
 		
@@ -322,17 +340,17 @@ public class Compiler {
 			
 			if (btiu(typeS.getFunct3()) == 0) { // sb
 				storeMem(getReg(btiu(typeS.getRs2()), 8), reg[btiu(typeS.getRs1())] + btis(typeS.getImm12(), 12));
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeS.getFunct3()) == 1) { // sh
 				storeMem(getReg(btiu(typeS.getRs2()), 16), reg[btiu(typeS.getRs1())] + btis(typeS.getImm12(), 12));
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeS.getFunct3()) == 2) { // sw
 				storeMem(getReg(btiu(typeS.getRs2()), 32), reg[btiu(typeS.getRs1())] + btis(typeS.getImm12(), 12));
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 		}
 		
@@ -341,7 +359,7 @@ public class Compiler {
 			
 			if (btiu(typeImm.getFunct3()) == 0) { // addi
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] + btis(typeImm.getImm12(), 12); // rd <- rs1 + imm12
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeImm.getFunct3()) == 2) { // slti
@@ -350,7 +368,7 @@ public class Compiler {
 				} else {
 					reg[btiu(typeImm.getRd())] = 0;
 				}
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeImm.getFunct3()) == 3) { // sltiu
@@ -359,27 +377,27 @@ public class Compiler {
 				} else {
 					reg[btiu(typeImm.getRd())] = 0;
 				}
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeImm.getFunct3()) == 4) { // xori
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] ^ btis(typeImm.getImm12(), 12);
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeImm.getFunct3()) == 6) { // ori
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] | btis(typeImm.getImm12(), 12);
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeImm.getFunct3()) == 7) { // andi
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] & btis(typeImm.getImm12(), 12);
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeImm.getFunct3()) == 1) { // slli
 				reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] << btis(typeImm.getImm12(), 12);
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeImm.getFunct3()) == 5) { // srli / srai
@@ -388,7 +406,7 @@ public class Compiler {
 				} else { // srai
 					reg[btiu(typeImm.getRd())] = reg[btiu(typeImm.getRs1())] >> btis(typeImm.getImm12(), 12);
 				}
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 		}
@@ -403,12 +421,12 @@ public class Compiler {
 					reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] - reg[btiu(typeR.getRs2())];
 				}
 				
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeR.getFunct3()) == 1) { // sll
 				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] << reg[btiu(typeR.getRs2())];
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeR.getFunct3()) == 2) { // slt
@@ -417,7 +435,7 @@ public class Compiler {
 				} else {
 					reg[btiu(typeR.getRd())] = 0;
 				}
-				pc = pc + 16;	
+				pc = pc + 32;	
 			}
 			
 			if (btiu(typeR.getFunct3()) == 3) { // sltu
@@ -426,12 +444,12 @@ public class Compiler {
 				} else {
 					reg[btiu(typeR.getRd())] = 0;
 				}
-				pc = pc + 16;		
+				pc = pc + 32;		
 			}
 			
 			if (btiu(typeR.getFunct3()) == 4) { // xor
 				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] ^ reg[btiu(typeR.getRs2())];
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeR.getFunct3()) == 5) { // srl / sra
@@ -440,23 +458,20 @@ public class Compiler {
 				} else { // sra
 					reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] >> reg[btiu(typeR.getRs2())];
 				}
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeR.getFunct3()) == 6) { // or
 				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] | reg[btiu(typeR.getRs2())];
-				pc = pc + 16;
+				pc = pc + 32;
 			}
 			
 			if (btiu(typeR.getFunct3()) == 7) { // and
 				reg[btiu(typeR.getRd())] = reg[btiu(typeR.getRs1())] & reg[btiu(typeR.getRs2())];
-				pc = pc + 16;
+				pc = pc + 32;
 			}	
 		}
-		
-		if (instruction instanceof TypeCallAtomic) {
-			TypeCallAtomic typeCallAtomic = (TypeCallAtomic) instruction; // TODO
-		}
+	
 	}
 	
 	public static Instruction getInstrType(BitSet instr) {
