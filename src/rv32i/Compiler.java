@@ -164,7 +164,7 @@ public class Compiler {
 
 		for (int i = 0; i < segment.length(); i++) {
 			if (segment.get(i)) {
-				result += 1 * Math.pow(2,i);
+				result |= (1 << i);
 			}
 		}
 		return result;
