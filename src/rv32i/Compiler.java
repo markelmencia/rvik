@@ -597,8 +597,7 @@ public class Compiler {
 				}
 			}
 			
-			if (btiu(typeB.getFunct3()) == 5) { // bge
-				
+			if (btiu(typeB.getFunct3()) == 5) { // bge				
 				if (reg[btiu(typeB.getRs1())] >= reg[btiu(typeB.getRs2())]) {
 					pc = pc + btis(typeB.getImm13(), 13);
 				} else {
@@ -623,8 +622,7 @@ public class Compiler {
 			}
 		}
 		
-		if (instruction instanceof TypeLoad) {
-			TypeLoad typeLoad = (TypeLoad) instruction;
+		if (instruction instanceof TypeLoad typeLoad) {
 			
 			if (btiu(typeLoad.getFunct3()) == 0) { // lb
 				reg[btiu(typeLoad.getRd())] = btis(loadMem((reg[btiu(typeLoad.getRs1())] + btis(typeLoad.getImm12(), 12)), 8), 8);
@@ -788,21 +786,20 @@ public class Compiler {
 				pc = pc + 32;
 			}	
 		}
-	
+		*/
 	}
 	
+	// Returns the specific instruction object (its type) via the given instruction's code operation.
 	public static Instruction getInstrType(BitSet instr) {
-		
-		// Returns the specific instruction object (its type)
-		// via the given instruction's code operation.
 		
 		BitSet codeop = new BitSet(7); // Little endian
 		for (int i = 0; i < 7; i++) {
 			codeop.set(i, instr.get(i));
 		}
+
+		Instruction result = codeopToInstr.get(btiu(codeop));
 		
-		Instruction result = null;
-		
+		/*
 		if (btiu(codeop) == 55) { // lui (0110111)
 			result = (TypeLui) new TypeLui();
 		}
@@ -842,32 +839,224 @@ public class Compiler {
 		if (btiu(codeop) == 115) { // calls / atomic (1110011)
 			result = (TypeCallAtomic) new TypeCallAtomic();
 		}
-	
+		*/
+
 		return result;
 	}
 	
-	public static void fillInstr(BitSet instr, Instruction instruction) {
+
+	public static void fillTypeLui(BitSet instructionArray, Instruction instruction) {
+		((TypeLui) instruction).setImm20(fillSegment(instructionArray, 12, 31));
+		((TypeLui) instruction).setRd(fillSegment(instructionArray, 7, 11));
+	}
+
+	public static void fillTypeAuipc(BitSet instructionArray, Instruction instruction) {
+		((TypeAuipc) instruction).setImm20(fillSegment(instructionArray, 12, 31));
+		((TypeAuipc) instruction).setRd(fillSegment(instructionArray, 7, 11));
+	}
+
+	public static void fillTypeJ(BitSet instructionArray, Instruction instruction) {
+		BitSet jImm21 = new BitSet(21);
+		jImm21.set(0, false);
+
+		// Fills the instruction according to the J Type bit structure
+		int o = 21;
+		for (int i = 1; i <= 10; i++) {
+			jImm21.set(i, instructionArray.get(o));
+			o++;
+		}
+		jImm21.set(11, instructionArray.get(20));
+		o = 12;
+		for (int i = 11; i <= 20; i++) {
+			jImm21.set(i, instructionArray.get(o));
+			o++;
+		}
+		/*
+		jImm21.set(0, false);
+		jImm21.set(1, instr.get(21));
+		jImm21.set(2, instr.get(22));
+		jImm21.set(3, instr.get(23));
+		jImm21.set(4, instr.get(24));
+		jImm21.set(5, instr.get(25));
+		jImm21.set(6, instr.get(26));
+		jImm21.set(7, instr.get(27));
+		jImm21.set(8, instr.get(28));
+		jImm21.set(9, instr.get(29));
+		jImm21.set(10, instr.get(30));
+		
+		jImm21.set(11, instr.get(20));
+		jImm21.set(12, instr.get(12));
+		jImm21.set(13, instr.get(13));
+		jImm21.set(14, instr.get(14));
+		jImm21.set(15, instr.get(15));
+		jImm21.set(16, instr.get(16));
+		jImm21.set(17, instr.get(17));
+		jImm21.set(18, instr.get(18));
+		jImm21.set(19, instr.get(19));
+		jImm21.set(20, instr.get(31));
+		*/
+		((TypeJ) instruction).setImm21(jImm21);
+		((TypeJ) instruction).setRd(fillSegment(instructionArray, 7, 11));
+	}
+
+	public static void fillTypeJalr(BitSet instructionArray, Instruction instruction) {
+		((TypeJalr) instruction).setImm12(fillSegment(instructionArray, 20, 31));
+		((TypeJalr) instruction).setRs1(fillSegment(instructionArray, 15, 19));
+		((TypeJalr) instruction).setFunct3(fillSegment(instructionArray, 12, 14));
+		((TypeJalr) instruction).setRd(fillSegment(instructionArray, 7, 11));
+	}
+
+	public static void fillTypeB(BitSet instructionArray, Instruction instruction) {
+		BitSet bImm13 = new BitSet(13);
+
+		int o = 8;
+		for (int i = 1; i <= 4; i++) {
+			bImm13.set(i, instructionArray.get(o));
+			o++;
+		}
+		o = 25;
+		for (int i = 5; i <= 10; i++) {
+			bImm13.set(i, instructionArray.get(o));
+			o++;
+		}
+		bImm13.set(11, instructionArray.get(7));
+		bImm13.set(12, instructionArray.get(31));
+		/*
+		bImm13.set(0, false);
+		bImm13.set(1, instruction.get(8));
+		bImm13.set(2, instruction.get(9));
+		bImm13.set(3, instruction.get(10));
+		bImm13.set(4, instruction.get(11));
+		bImm13.set(5, instruction.get(25));
+		bImm13.set(6, instruction.get(26));
+		bImm13.set(7, instruction.get(27));
+		bImm13.set(8, instruction.get(28));
+		bImm13.set(9, instruction.get(29));
+		bImm13.set(10, instruction.get(30));
+		bImm13.set(11, instruction.get(7));
+			bImm13.set(12, instruction.get(31));
+		*/
+		((TypeB) instruction).setImm13(bImm13);
+		((TypeB) instruction).setRs2(fillSegment(instructionArray, 20, 24));
+		((TypeB) instruction).setRs1(fillSegment(instructionArray, 15, 19));
+		((TypeB) instruction).setFunct3(fillSegment(instructionArray, 12, 14));
+	}
+
+	public static void fillTypeLoad(BitSet instructionArray, Instruction instruction) {
+		((TypeLoad) instruction).setImm12(fillSegment(instructionArray, 20, 31));
+		((TypeLoad) instruction).setRs1(fillSegment(instructionArray, 15, 19));
+		((TypeLoad) instruction).setFunct3(fillSegment(instructionArray, 12, 14));
+		((TypeLoad) instruction).setRd(fillSegment(instructionArray, 7, 11));
+	}
+
+	public static void fillTypeS(BitSet instructionArray, Instruction instruction) {
+		BitSet sImm12 = new BitSet(12);
+
+		int o = 7;
+		for (int i = 0; i <= 4; i++) {
+			sImm12.set(i, instructionArray.get(o));
+			}
+
+		o = 25;
+		for (int i = 5; i <= 11; i++) {
+			sImm12.set(i, instructionArray.get(o));
+		}
+		/*
+		sImm12.set(0, instruction.get(7));
+		sImm12.set(1, instruction.get(8));
+		sImm12.set(2, instruction.get(9));
+		sImm12.set(3, instruction.get(10));
+		sImm12.set(4, instruction.get(11));
+		sImm12.set(5, instruction.get(25));
+		sImm12.set(6, instruction.get(26));
+		sImm12.set(7, instruction.get(27));
+		sImm12.set(8, instruction.get(28));
+		sImm12.set(9, instruction.get(29));
+		sImm12.set(10, instruction.get(30));
+		sImm12.set(11, instruction.get(31));
+		*/
+		((TypeS) instruction).setImm12(sImm12);
+		((TypeS) instruction).setRs2(fillSegment(instructionArray, 20, 24));
+		((TypeS) instruction).setRs1(fillSegment(instructionArray, 15, 19));
+		((TypeS) instruction).setFunct3(fillSegment(instructionArray, 12, 14));
+	}
+
+	public static void fillTypeImm(BitSet instructionArray, Instruction instruction) {
+		((TypeImm) instruction).setImm12(fillSegment(instructionArray, 20, 31));
+		((TypeImm) instruction).setRs1(fillSegment(instructionArray, 15, 19));
+		((TypeImm) instruction).setFunct3(fillSegment(instructionArray, 12, 14));
+		((TypeImm) instruction).setRd(fillSegment(instructionArray, 7, 11));
+		((TypeImm) instruction).setInstr30(instructionArray.get(30));
+	}
+
+	public static void fillTypeR(BitSet instructionArray, Instruction instruction) {
+		((TypeImm) instruction).setImm12(fillSegment(instructionArray, 20, 31));
+		((TypeImm) instruction).setRs1(fillSegment(instructionArray, 15, 19));
+		((TypeImm) instruction).setFunct3(fillSegment(instructionArray, 12, 14));
+		((TypeImm) instruction).setRd(fillSegment(instructionArray, 7, 11));
+		((TypeImm) instruction).setInstr30(instructionArray.get(30));
+	}
+
+	public static void fillTypeCallAtomic(BitSet instructionArray, Instruction instruction) {
+		((TypeCallAtomic) instruction).setCsr12(fillSegment(instructionArray, 20, 31));
+		((TypeCallAtomic) instruction).setRs1(fillSegment(instructionArray, 15, 19));
+		((TypeCallAtomic) instruction).setFunct3(fillSegment(instructionArray, 12, 14));
+		((TypeCallAtomic) instruction).setRd(fillSegment(instructionArray, 7, 11));
+	}
+
+	public static void fillInstr(BitSet instructionArray, Instruction instruction) {
 		
 		// Fills in the attributes of an instruction according to its 
 		// instruction type.
-		
+
+		HashMap<Class<? extends Instruction>, Runnable> fillerMap = new HashMap<>() {{
+			put(TypeLui.class, 			() -> fillTypeLui(instructionArray, (TypeLui) instruction));
+			put(TypeAuipc.class, 		() -> fillTypeAuipc(instructionArray, (TypeAuipc) instruction));
+			put(TypeJ.class, 			() -> fillTypeJ(instructionArray, (TypeJ) instruction));
+			put(TypeJalr.class, 		() -> fillTypeJalr(instructionArray, (TypeJalr) instruction));
+			put(TypeB.class, 			() -> fillTypeB(instructionArray, (TypeB) instruction));
+			put(TypeLoad.class,			() -> fillTypeLoad(instructionArray, (TypeLoad) instruction));
+			put(TypeS.class, 			() -> fillTypeS(instructionArray, (TypeS) instruction));
+			put(TypeImm.class, 			() -> fillTypeImm(instructionArray, (TypeImm) instruction));
+			put(TypeR.class, 			() -> fillTypeR(instructionArray, (TypeR) instruction));
+			put(TypeCallAtomic.class, 	() -> fillTypeCallAtomic(instructionArray, (TypeCallAtomic) instruction));
+		}};
+
+		Runnable filler = fillerMap.get(instruction.getClass());
+		if (filler != null) {
+			filler.run();
+		} else {
+			System.err.println("Error: Instruction instance not found");
+		}
+		/*
 		if (instruction instanceof TypeLui) {
-			TypeLui typeLui = (TypeLui) instruction;
-			
-			typeLui.setImm20(fillSegment(instr, 12, 31));
-			typeLui.setRd(fillSegment(instr, 7, 11));
+			(TypeLui) instruction.setImm20(fillSegment(instr, 12, 31));
+			(TypeLui) instruction.setRd(fillSegment(instr, 7, 11));
 		}
 		
 		if (instruction instanceof TypeAuipc) {
-			TypeAuipc typeAuipc = (TypeAuipc) instruction;
-			
-			typeAuipc.setImm20(fillSegment(instr, 12, 31));
-			typeAuipc.setRd(fillSegment(instr, 7, 11));
+			(TypeAuipc) instruction.setImm20(fillSegment(instr, 12, 31));
+			(TypeAuipc) instruction.setRd(fillSegment(instr, 7, 11));
 		}
 		
 		if (instruction instanceof TypeJ) {
 			BitSet jImm21 = new BitSet(21);
 			jImm21.set(0, false);
+
+			// Fills the instruction according to the J Type bit structure
+			int o = 21;
+			for (int i = 1; i <= 10; i++) {
+				jImm21.set(i, instr.get(o));
+				o++;
+			}
+			jImm21.set(11, instr.get(20));
+			o = 12;
+			for (int i = 11; i <= 20; i++) {
+				jImm21.set(i, instr.get(o));
+				o++;
+			}
+
+			jImm21.set(0), false);
 			jImm21.set(1, instr.get(21));
 			jImm21.set(2, instr.get(22));
 			jImm21.set(3, instr.get(23));
@@ -878,6 +1067,7 @@ public class Compiler {
 			jImm21.set(8, instr.get(28));
 			jImm21.set(9, instr.get(29));
 			jImm21.set(10, instr.get(30));
+			
 			jImm21.set(11, instr.get(20));
 			jImm21.set(12, instr.get(12));
 			jImm21.set(13, instr.get(13));
@@ -888,24 +1078,35 @@ public class Compiler {
 			jImm21.set(18, instr.get(18));
 			jImm21.set(19, instr.get(19));
 			jImm21.set(20, instr.get(31));
-			
-			TypeJ typeJ = (TypeJ) instruction;
-			
-			typeJ.setImm21(jImm21);
-			typeJ.setRd(fillSegment(instr, 7, 11));
+
+			(TypeJ) instruction.setImm21(jImm21);
+			(TypeJ) instruction.setRd(fillSegment(instr, 7, 11));
 		}
 		
-		if (instruction instanceof TypeJalr) {
-			TypeJalr typeJalr = (TypeJalr) instruction;
-			
-			typeJalr.setImm12(fillSegment(instr, 20, 31));
-			typeJalr.setRs1(fillSegment(instr, 15, 19));
-			typeJalr.setFunct3(fillSegment(instr, 12, 14));
-			typeJalr.setRd(fillSegment(instr, 7, 11));
+		if (instruction instanceof TypeJalr) {	
+			(TypeJalr) instruction.setImm12(fillSegment(instr, 20, 31));
+			(TypeJalr) instruction.setRs1(fillSegment(instr, 15, 19));
+			(TypeJalr) instruction.setFunct3(fillSegment(instr, 12, 14));
+			(TypeJalr) instruction.setRd(fillSegment(instr, 7, 11));
 		}
 		
 		if (instruction instanceof TypeB) {
 			BitSet bImm13 = new BitSet(13);
+
+			int o = 8;
+			for (int i = 1; i <= 4; i++) {
+				bImm13.set(i, instr.get(o));
+				o++;
+			}
+			o = 25;
+			for (int i = 5; i <= 10; i++) {
+				bImm13.set(i, instr.get(o));
+				o++;
+			}
+			bImm13.set(11, instr.get(7));
+			bImm13.set(12, instr.get(31));
+
+			
 			bImm13.set(0, false);
 			bImm13.set(1, instr.get(8));
 			bImm13.set(2, instr.get(9));
@@ -920,23 +1121,34 @@ public class Compiler {
 			bImm13.set(11, instr.get(7));
 			bImm13.set(12, instr.get(31));
 			
-			TypeB typeB = (TypeB) instruction;
-			
-			typeB.setImm13(bImm13);
-			((TypeB) instruction).setRs2(fillSegment(instr, 20, 24));
-			((TypeB) instruction).setRs1(fillSegment(instr, 15, 19));
-			((TypeB) instruction).setFunct3(fillSegment(instr, 12, 14));
+
+			(TypeB) instruction.setImm13(bImm13);
+			(TypeB) instruction.setRs2(fillSegment(instr, 20, 24));
+			(TypeB) instruction.setRs1(fillSegment(instr, 15, 19));
+			(TypeB) instruction.setFunct3(fillSegment(instr, 12, 14));
 		}
 		
 		if (instruction instanceof TypeLoad) {
-			((TypeLoad) instruction).setImm12(fillSegment(instr, 20, 31));
-			((TypeLoad) instruction).setRs1(fillSegment(instr, 15, 19));
-			((TypeLoad) instruction).setFunct3(fillSegment(instr, 12, 14));
-			((TypeLoad) instruction).setRd(fillSegment(instr, 7, 11));
+			(TypeLoad) instruction.setImm12(fillSegment(instr, 20, 31));
+			(TypeLoad) instruction.setRs1(fillSegment(instr, 15, 19));
+			(TypeLoad) instruction.setFunct3(fillSegment(instr, 12, 14));
+			(TypeLoad) instruction.setRd(fillSegment(instr, 7, 11));
 		}
 		
 		if (instruction instanceof TypeS) {
 			BitSet sImm12 = new BitSet(12);
+
+			int o = 7;
+			for (int i = 0; i <= 4; i++) {
+				sImm12(i, instr.get(o));
+			}
+
+			int o = 25;
+			for (int i = 5; i <= 11; i++) {
+				sImm12(i, instr.get(o));
+			}
+
+			
 			sImm12.set(0, instr.get(7));
 			sImm12.set(1, instr.get(8));
 			sImm12.set(2, instr.get(9));
@@ -950,6 +1162,7 @@ public class Compiler {
 			sImm12.set(10, instr.get(30));
 			sImm12.set(11, instr.get(31));
 			
+
 			((TypeS) instruction).setImm12(sImm12);
 			((TypeS) instruction).setRs2(fillSegment(instr, 20, 24));
 			((TypeS) instruction).setRs1(fillSegment(instr, 15, 19));
@@ -978,5 +1191,6 @@ public class Compiler {
 			((TypeCallAtomic) instruction).setFunct3(fillSegment(instr, 12, 14));
 			((TypeCallAtomic) instruction).setRd(fillSegment(instr, 7, 11));
 		}
+		*/
 	}
 }
