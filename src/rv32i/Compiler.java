@@ -92,7 +92,7 @@ public class Compiler {
 	 */
 	public static boolean instructionIsEmpty(BitSet instr) {
 		for (int i = 0; i < 32; i++) {
-			if (instructionArray.get(i)) {
+			if (instr.get(i)) {
 				return false;
 			}
 		}
