@@ -211,22 +211,14 @@ public class Compiler {
 	 * Gets the value of a register up to size
 	 */
 	public static BitSet getReg(int regIndex, int size) {
-		
-		// Returns the sized array with the value of the
-		// requested register.
-		
-		String binary = Integer.toBinaryString(reg[regIndex]);
-		BitSet segment = new BitSet(32);
-		for (int i = 0; i < binary.length(); i++) {
-				segment.set(binary.length() - 1 - i, binary.charAt(i) == '1');
-		}
-		
-		BitSet result = new BitSet(size);
-		for (int i = 0; i < size; i++) {
-			result.set(i, segment.get(i));
-		}
-		
-		return result;
+    	int regValue = reg[regIndex];
+    	BitSet result = new BitSet(size);
+    
+    	for (int i = 0; i < size; i++) {
+        	// Masks the specific bit that is about to be set/unset and checks if it's set
+        	result.set(i, (regValue & (1 << (size - 1 - i))) != 0);
+   		}
+    	return result;
 	}
 	
 	public static void runInstruction(Instruction instruction) {
