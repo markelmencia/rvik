@@ -36,6 +36,9 @@ public class Compiler {
 	
 	// MEMORY RELATED METHODS
 	
+	/**
+	 * Gets the BitSet the Program Counter is pointing to
+	 */
 	public static BitSet getInstr() {
 		BitSet result = new BitSet();
 		int start = pc;
@@ -46,10 +49,14 @@ public class Compiler {
 			result.set(j, pm.get(i));
 			j++;
 		}
-		
 		return result;
 	}
 
+	/**
+	 * Gets a BitSet with the content of the specified address up to size
+	 * @param address The first address that will be read
+	 * @param size The amount of adresses that will be read after the first
+	 */
 	public static BitSet loadMem(int address, int size) {
 		BitSet result = new BitSet(size);
 		int start = address;
@@ -63,7 +70,11 @@ public class Compiler {
 		return result;
 	}
 	
-	
+	/**
+	 * Stores a BitSet into the specified address
+	 * @param segment The bit segment that will be stored
+	 * @param address The first address in which the segment will be stored
+	 */
 	public static void storeMem(BitSet segment, int address) {
 		int start = address;
 		int finish = address + segment.length();
@@ -75,38 +86,47 @@ public class Compiler {
 		}
 	}
 		
-	public static boolean instructionIsEmpty(BitSet instructionArray) {
+	/**
+	 * Returns true if the BitSet is empty (has no set bits).
+	 * @param instr The BitSet that will be checked
+	 */
+	public static boolean instructionIsEmpty(BitSet instr) {
 		for (int i = 0; i < 32; i++) {
 			if (instructionArray.get(i)) {
 				return false;
 			}
 		}
-		
 		return true;
 	}
 	
+	
+	/**
+	 * Runs a program. The instructions will execute until an empty instruction is found.
+	 */
 	public static void run() {
 		BitSet instructionArray = getInstr();
-		Instruction instruction;
-		
-		
+		Instruction instruction; // TODO: test it
+			
 		while(!instructionIsEmpty(instructionArray)) {
-
 			instruction = getInstrType(instructionArray);
 			fillInstr(instructionArray, instruction);
 			runInstruction(instruction);
-			reg[0] = 0;
+			reg[0] = 0; // The first register is hardcoded to 0
 			instructionArray = getInstr();
 		}
 	}
 	
 	// COMPILER FUNCTIONALITY FUNCTIONS
 	
+	/**
+	 * Gets an instruction array and a bit range and returns an array filtering 
+	 * out the rest of the instruction. Used in fillInstr() for simplicity purposes.
+	 * @param instr The instruction array that will be filtered.
+	 * @param first the first bit of the range.
+	 * @param last The last bit of the range.
+	 * @return An array of the size of the range, with the bits that haven't been filtered out.
+	 */
 	public static BitSet fillSegment(BitSet instr, int first, int last) {
-		
-		// Gets an instruction array and a bit range and returns an array filtering out
-		// the rest of the instruction. Used in fillInstr() for simplicity purposes.
-		
 		int length = last - first + 1;
 		BitSet result = new BitSet(length);
 		
@@ -114,15 +134,17 @@ public class Compiler {
 		for (int i = first; i < last + 1; i++) {
 			result.set(o, instr.get(i)); 
 			o++;
-		}
-		
+		}	
 		return result;
 	}
 	
+	/**
+	 * Extends a bit array to a desired bit ammount.
+	 * @param segment The instruction array that will be filtered.
+	 * @param first the first bit of the range.
+	 * @return The extended BitSet
+	 */
 	public static BitSet bitExtension(BitSet segment, int resultBits) {
-		
-		// Extends a bit array to a desired bit ammount. PROBABLY REDUNDANT.
-		
 		BitSet result = new BitSet(resultBits);
 		
 		for (int i = 0; i < segment.length(); i++) {
@@ -131,6 +153,9 @@ public class Compiler {
 		return result;
 	}
 	
+	/**
+	 * Converts a binary array to a base-10 integer (unsigned)
+	 */
 	public static int btiu(BitSet segment) {
 		
 		// Binary to int unsigned.
@@ -145,6 +170,9 @@ public class Compiler {
 		return result;
 	}
 	
+	/**
+	 * Converts a binary array to a base-10 integer (unsigned)
+	 */
 	public static int btis(BitSet segment, int size) {
 		
 		// Binary to int signed. Due to BitSize having
