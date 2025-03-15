@@ -5,62 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.BitSet;
 
-/*	TESTED INSTRUCTIONS
-	
-	lui: WORKING
-	auipc: WORKING 
-	jal: WORKING
-	jalr: WORKING
-	
-	add: WORKING
-	sub: WORKING
-	sll: WORKING
-	slt: WORKING
-	sltu: WORKING
-	xor: WORKING
-	srl: WORKING
-	sra: WORKING
-	or: WORKING
-	and: WORKING
-	
-	addi: WORKING
-	slti: WORKING
-	sltiu: WORKING
-	xori: WORKING
-	ori: WORKING
-	andi: WORKING
-	slli: WORKING
-	srli: WORKING
-	srai: WORKING
-	
-	sb: WORKING
-	sh: WORKING
-	sw: WORKING
-	
-	lb: WORKING
-	lh: WORKING
-	lw: WORKING
-	lbu: WORKING
-	lhu: WORKING
-	
-	beq: WORKING
-	bne: WORKING
-	blt: WORKING
-	bge: WORKING
-	bltu: WORKING
-	bgeu: WORKING
-	
-	csrrw: TODO
-	csrrs: TODO
-	csrrc: TODO
-	csrrwi: TODO
-	csrrsi: TODO
-	csrrci: TODO
-	
-*/
-
 public class Assembler {
-
 	
 	public static BitSet itba(int num, int length) {
 		
