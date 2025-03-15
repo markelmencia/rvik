@@ -20,6 +20,19 @@ public class Compiler {
 	
 	public static BitSet pm = new BitSet(65536); // Size TBD
 	public static BitSet mem = new BitSet(65536); // Size TBD
+
+	public static HashMap<Integer, Instruction> codeopToInstr = new HashMap<Integer, Instruction>() {{
+			put(55,  new TypeLui()); 		// (0110111)
+			put(23,  new TypeAuipc()); 		// (0010111)
+			put(111, new TypeJ()); 			// (1101111)
+			put(103, new TypeJalr()); 		// (1100111)
+			put(99,  new TypeB()); 			// (1100011)
+			put(3, 	 new TypeLoad()); 		// (0000011)
+			put(35,  new TypeS()); 			// (0100011)
+			put(19,  new TypeImm()); 		// (0010011)
+			put(51,  new TypeR());    		// (0110011)
+			put(115, new TypeCallAtomic()); // (1110011)
+		}};
 	
 	// MEMORY RELATED METHODS
 	
