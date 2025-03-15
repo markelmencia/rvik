@@ -178,14 +178,12 @@ public class Compiler {
 		// Binary to int signed. Due to BitSize having
 		// a dinamic length depending on the last bit set,
 		// a size parameter is needed.
-		
+		/*
 		int result = 0;
 		
-		if (segment.length() < size) {
-		
+		if (segment.length() < size) {		
 			result = btiu(segment);
-		} else {
-			
+		} else {			
 			for (int i = 0; i < segment.length(); i++) {
 				if (!segment.get(i)) {
 					result = result + ((int) Math.pow(2,i));
@@ -195,10 +193,23 @@ public class Compiler {
 			result = 0 - result;
 		}
 		return result;
-		
+		*/
+		int result = 0;
+
+		for (int i = 0; i < size; i++) {
+			if (segment.get(i)) {
+				result |= (1 << i);
+			}
+		}
+		if (segment.get(size - 1)) {
+			result -= (1 << size);
+		}
+		return result;
 	}
 
-	
+	/**
+	 * Gets the value of a register up to size
+	 */
 	public static BitSet getReg(int regIndex, int size) {
 		
 		// Returns the sized array with the value of the
