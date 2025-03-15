@@ -9,6 +9,14 @@ public class Assembler {
 	
 	public static BitSet itba(int num, int length) {
 		
+		BitSet result = new BitSet(length);
+   	 	for (int i = 0; i < length; i++) {
+			// Masks num to check each bit
+        	result.set(i, (num & (1 << i)) != 0);
+    	}
+
+    	return result;
+		/*
 		// Integer to Binary Array
 		
 		BitSet result = new BitSet(length);
@@ -18,6 +26,7 @@ public class Assembler {
 			result.set(i, numString.charAt(stringLength - 1 - i) == '1');
 		}
 		return result;
+		*/
 	}
 	
 	
