@@ -521,15 +521,15 @@ public class Compiler {
 	public static void runInstruction(Instruction instruction) {
 		
 		HashMap<Class<? extends Instruction>, Runnable> run = new HashMap<>() {{ // TODO: Perhaps move this to the global scope
-			put(TypeLui.class, 	 () -> runTypeLui((TypeLui) instruction));
+			put(TypeLui.class,   () -> runTypeLui((TypeLui) instruction));
 			put(TypeAuipc.class, () -> runTypeAuipc((TypeAuipc) instruction));
-			put(TypeJ.class, 	 () -> runTypeJ((TypeJ) instruction));
+			put(TypeJ.class,     () -> runTypeJ((TypeJ) instruction));
 			put(TypeJalr.class,  () -> runTypeJalr((TypeJalr) instruction));
-			put(TypeB.class, 	 () -> runTypeB((TypeB) instruction));
+			put(TypeB.class,     () -> runTypeB((TypeB) instruction));
 			put(TypeLoad.class,  () -> runTypeLoad((TypeLoad) instruction));
-			put(TypeS.class, 	 () -> runTypeS((TypeS) instruction));
+			put(TypeS.class,     () -> runTypeS((TypeS) instruction));
 			put(TypeImm.class,   () -> runTypeImm((TypeImm) instruction));
-			put(TypeR.class, 	 () -> runTypeR((TypeR) instruction));
+			put(TypeR.class,     () -> runTypeR((TypeR) instruction));
 		}};
 
 		Runnable function = run.get(instruction.getClass());  // Get the Runnable based on the instruction's class
@@ -1010,16 +1010,16 @@ public class Compiler {
 		// instruction type.
 
 		HashMap<Class<? extends Instruction>, Runnable> fillerMap = new HashMap<>() {{
-			put(TypeLui.class, 			() -> fillTypeLui(instructionArray, (TypeLui) instruction));
-			put(TypeAuipc.class, 		() -> fillTypeAuipc(instructionArray, (TypeAuipc) instruction));
-			put(TypeJ.class, 			() -> fillTypeJ(instructionArray, (TypeJ) instruction));
-			put(TypeJalr.class, 		() -> fillTypeJalr(instructionArray, (TypeJalr) instruction));
-			put(TypeB.class, 			() -> fillTypeB(instructionArray, (TypeB) instruction));
-			put(TypeLoad.class,			() -> fillTypeLoad(instructionArray, (TypeLoad) instruction));
-			put(TypeS.class, 			() -> fillTypeS(instructionArray, (TypeS) instruction));
-			put(TypeImm.class, 			() -> fillTypeImm(instructionArray, (TypeImm) instruction));
-			put(TypeR.class, 			() -> fillTypeR(instructionArray, (TypeR) instruction));
-			put(TypeCallAtomic.class, 	() -> fillTypeCallAtomic(instructionArray, (TypeCallAtomic) instruction));
+			put(TypeLui.class,        () -> fillTypeLui(instructionArray, (TypeLui) instruction));
+			put(TypeAuipc.class,      () -> fillTypeAuipc(instructionArray, (TypeAuipc) instruction));
+			put(TypeJ.class,          () -> fillTypeJ(instructionArray, (TypeJ) instruction));
+			put(TypeJalr.class,       () -> fillTypeJalr(instructionArray, (TypeJalr) instruction));
+			put(TypeB.class,          () -> fillTypeB(instructionArray, (TypeB) instruction));
+			put(TypeLoad.class,       () -> fillTypeLoad(instructionArray, (TypeLoad) instruction));
+			put(TypeS.class,          () -> fillTypeS(instructionArray, (TypeS) instruction));
+			put(TypeImm.class,        () -> fillTypeImm(instructionArray, (TypeImm) instruction));
+			put(TypeR.class,          () -> fillTypeR(instructionArray, (TypeR) instruction));
+			put(TypeCallAtomic.class, () -> fillTypeCallAtomic(instructionArray, (TypeCallAtomic) instruction));
 		}};
 
 		Runnable filler = fillerMap.get(instruction.getClass());
