@@ -14,17 +14,14 @@ public class CompilerTest {
 
     @Test
     public void testGetInstr() {
-        BitSet bitSet = new BitSet(32);
-        for (int i = 0; i < 10; i++) {
-            bitSet.set(i);
+        BitSet bitset = BitSet.valueOf(new long[]{0b00000000000100000000000001110011}); // ebreak instruction (arbitrary)
+        int j = 0;
+        for (int i = 32; i < 64; i++) {
+            Compiler.pm.set(i, bitset.get(j));
+            j++;
         }
-
         Compiler.pc = 32;
-        for (int i = 32; i < 42; i++) {
-            Compiler.pm.set(i);
-        }
-        System.out.println(bitSet);
-        assertEquals(bitSet, Compiler.getInstr());
+        assertEquals(bitset, Compiler.getInstr());
     }
 
     @Test
