@@ -137,16 +137,16 @@ public class CompilerTest {
 
     @Test
     public void testGetInstrType() {
-        BitSet typeLui = BitSet.valueOf(new long[]{55});
-        BitSet typeAuipc = BitSet.valueOf(new long[]{23});
-        BitSet typeJ = BitSet.valueOf(new long[]{111});
-        BitSet typeJalr = BitSet.valueOf(new long[]{103});
-        BitSet typeB = BitSet.valueOf(new long[]{99});
-        BitSet typeLoad = BitSet.valueOf(new long[]{3});
-        BitSet typeS = BitSet.valueOf(new long[]{35});
-        BitSet typeImm = BitSet.valueOf(new long[]{19});
-        BitSet typeR = BitSet.valueOf(new long[]{51});
-        BitSet typeCallAtomic = BitSet.valueOf(new long[]{115});
+        BitSet typeLui = BitSet.valueOf(new long[]{0b0110111});
+        BitSet typeAuipc = BitSet.valueOf(new long[]{0b00010111});
+        BitSet typeJ = BitSet.valueOf(new long[]{0b1101111});
+        BitSet typeJalr = BitSet.valueOf(new long[]{0b1100111});
+        BitSet typeB = BitSet.valueOf(new long[]{0b1100011});
+        BitSet typeLoad = BitSet.valueOf(new long[]{0b0000011});
+        BitSet typeS = BitSet.valueOf(new long[]{0b0100011});
+        BitSet typeImm = BitSet.valueOf(new long[]{0b0010011});
+        BitSet typeR = BitSet.valueOf(new long[]{0b0110011});
+        BitSet typeCallAtomic = BitSet.valueOf(new long[]{0b1110011});
 
         assertEquals(TypeLui.class,         Compiler.getInstrType(typeLui).getClass());
         assertEquals(TypeAuipc.class,       Compiler.getInstrType(typeAuipc).getClass());
@@ -158,5 +158,11 @@ public class CompilerTest {
         assertEquals(TypeImm.class,         Compiler.getInstrType(typeImm).getClass());
         assertEquals(TypeR.class,           Compiler.getInstrType(typeR).getClass());
         assertEquals(TypeCallAtomic.class,  Compiler.getInstrType(typeCallAtomic).getClass());
+    }
+
+    @Test
+    public void testFillInstr() {
+        TypeLui typeLui = new TypeLui();
+        BitSet luiBitSet = new BitSet(32);
     }
 }
