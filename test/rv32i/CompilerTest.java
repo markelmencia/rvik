@@ -7,8 +7,7 @@ import java.util.BitSet;
 
 import org.junit.Test;
 
-import instructions.Instruction;
-import instructions.TypeLui;
+import instructions.*;
 import rv32i.Compiler;
 
 public class CompilerTest {
@@ -137,8 +136,27 @@ public class CompilerTest {
     }
 
     @Test
-    public void testRunInstruction() {
-        TypeLui lui = new TypeLui();
-        lui.setImm20()
+    public void testGetInstrType() {
+        BitSet typeLui = BitSet.valueOf(new long[]{55});
+        BitSet typeAuipc = BitSet.valueOf(new long[]{23});
+        BitSet typeJ = BitSet.valueOf(new long[]{111});
+        BitSet typeJalr = BitSet.valueOf(new long[]{103});
+        BitSet typeB = BitSet.valueOf(new long[]{99});
+        BitSet typeLoad = BitSet.valueOf(new long[]{3});
+        BitSet typeS = BitSet.valueOf(new long[]{35});
+        BitSet typeImm = BitSet.valueOf(new long[]{19});
+        BitSet typeR = BitSet.valueOf(new long[]{51});
+        BitSet typeCallAtomic = BitSet.valueOf(new long[]{115});
+
+        assertEquals(TypeLui.class,         Compiler.getInstrType(typeLui).getClass());
+        assertEquals(TypeAuipc.class,       Compiler.getInstrType(typeAuipc).getClass());
+        assertEquals(TypeJ.class,           Compiler.getInstrType(typeJ).getClass());
+        assertEquals(TypeJalr.class,        Compiler.getInstrType(typeJalr).getClass());
+        assertEquals(TypeB.class,           Compiler.getInstrType(typeB).getClass());
+        assertEquals(TypeLoad.class,        Compiler.getInstrType(typeLoad).getClass());
+        assertEquals(TypeS.class,           Compiler.getInstrType(typeS).getClass());
+        assertEquals(TypeImm.class,         Compiler.getInstrType(typeImm).getClass());
+        assertEquals(TypeR.class,           Compiler.getInstrType(typeR).getClass());
+        assertEquals(TypeCallAtomic.class,  Compiler.getInstrType(typeCallAtomic).getClass());
     }
 }
