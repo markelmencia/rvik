@@ -159,7 +159,186 @@ public class CompilerTest {
 
     @Test
     public void testFillInstr() {
+        // Lui Type
         TypeLui typeLui = new TypeLui();
-        BitSet luiBitSet = new BitSet(32);
+        BitSet luiBitSet = new BitSet() {{
+            // imm20
+            set(12);
+            set(13);
+            set(14);
+            // rd
+            set(7);
+            set(9);
+        }};
+        Compiler.fillInstr(luiBitSet, typeLui);
+        assertEquals(BitSet.valueOf(new long[]{7}), typeLui.getImm20());
+        assertEquals(BitSet.valueOf(new long[]{5}), typeLui.getRd());
+        
+        // Auipc Type
+        TypeAuipc typeAuipc = new TypeAuipc();
+        BitSet auipcBitSet = new BitSet() {{
+             // imm20
+             set(12);
+             set(14);
+             // rd
+             set(8);
+        }};
+        Compiler.fillInstr(auipcBitSet, typeAuipc);
+        assertEquals(BitSet.valueOf(new long[]{5}), typeAuipc.getImm20());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeAuipc.getRd());
+
+        // J Type
+        TypeJ typeJ = new TypeJ();
+        BitSet jBitSet = new BitSet() {{
+            // imm21
+            set(12);
+            set(31);
+            set(21);
+            // rd
+            set(9);
+       }};
+       Compiler.fillInstr(jBitSet, typeJ);
+       // The purpose of this number in particular is to test
+       // the bit reallocation that occurs in the jal assembly
+       assertEquals(BitSet.valueOf(new long[]{1052674}), typeJ.getImm21());
+       assertEquals(BitSet.valueOf(new long[]{4}), typeJ.getRd());
+
+        // Jalr Type
+        TypeJalr typeJalr = new TypeJalr();
+        BitSet jalrBitSet = new BitSet() {{
+            // rd
+            set(7);
+            set(8);
+            // rs1
+            set(18);
+            // imm12
+            set(20);
+        }};
+        Compiler.fillInstr(jalrBitSet, typeJalr);
+
+        assertEquals(BitSet.valueOf(new long[]{3}), typeJalr.getRd());
+        assertEquals(BitSet.valueOf(new long[]{8}), typeJalr.getRs1());
+        assertEquals(BitSet.valueOf(new long[]{1}), typeJalr.getImm12());
+
+        // B Type
+        TypeB typeB = new TypeB();
+        BitSet bBitSet = new BitSet() {{
+            // imm13
+            set(7);
+            set(8);
+            set(25);
+            set(31);
+            // funct3
+            set(14);
+            // rs1
+            set(16);
+            // rs2
+            set(22);
+        }};
+        Compiler.fillInstr(bBitSet, typeB);
+
+        assertEquals(BitSet.valueOf(new long[]{6178}), typeB.getImm13());
+        assertEquals(BitSet.valueOf(new long[]{4}), typeB.getFunct3());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeB.getRs1());
+        assertEquals(BitSet.valueOf(new long[]{4}), typeB.getRs2());
+
+        // Load Type
+        TypeLoad typeLoad = new TypeLoad();
+        BitSet loadBitSet = new BitSet() {{
+            // rd
+            set(8);
+            // funct3
+            set(13);
+            // rs1
+            set(17);
+            // imm12
+            set(22);
+        }};
+        Compiler.fillInstr(loadBitSet, typeLoad);
+
+        assertEquals(BitSet.valueOf(new long[]{4}), typeLoad.getImm12());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeLoad.getFunct3());
+        assertEquals(BitSet.valueOf(new long[]{4}), typeLoad.getRs1());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeLoad.getRd());
+
+        // S Type
+        TypeS typeS = new TypeS();
+        BitSet sBitSet = new BitSet() {{
+            // funct3
+            set(13);
+            // rs1
+            set(17);
+            // rs2
+            set(22);
+            // imm12
+            set(8);
+            set(25);
+        }};
+        Compiler.fillInstr(sBitSet, typeS);
+
+        assertEquals(BitSet.valueOf(new long[]{34}), typeS.getImm12());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeS.getFunct3());
+        assertEquals(BitSet.valueOf(new long[]{4}), typeS.getRs1());
+        assertEquals(BitSet.valueOf(new long[]{4}), typeS.getRs2());
+
+        // Imm Type
+        TypeImm typeImm = new TypeImm();
+        BitSet immBitSet = new BitSet() {{
+            // rd
+            set(8);
+            // funct3
+            set(13);
+            // rs1
+            set(17);
+            // imm12
+            set(22);
+        }};
+        Compiler.fillInstr(immBitSet, typeImm);
+
+        assertEquals(BitSet.valueOf(new long[]{4}), typeImm.getImm12());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeImm.getFunct3());
+        assertEquals(BitSet.valueOf(new long[]{4}), typeImm.getRs1());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeImm.getRd());
+
+        // R Type
+        TypeR typeR = new TypeR();
+        BitSet rBitSet = new BitSet() {{
+            // rd
+            set(8);
+            // funct3
+            set(13);
+            // rs1
+            set(17);
+            // rs2
+            set(22);
+            // funct7
+            set(25);
+        }};
+        Compiler.fillInstr(rBitSet, typeR);
+
+        assertEquals(BitSet.valueOf(new long[]{1}), typeR.getFunct7());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeR.getFunct3());
+        assertEquals(BitSet.valueOf(new long[]{4}), typeR.getRs1());
+        assertEquals(BitSet.valueOf(new long[]{4}), typeR.getRs2());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeR.getRd());
+
+        // CallAtomic Type
+        TypeCallAtomic typeCallAtomic = new TypeCallAtomic();
+        BitSet callAtomicBitSet = new BitSet() {{
+            // rd
+            set(8);
+            // funct3
+            set(13);
+            // rs1
+            set(17);
+            // csr12
+            set(22);
+        }};
+        Compiler.fillInstr(callAtomicBitSet, typeCallAtomic);
+
+        assertEquals(BitSet.valueOf(new long[]{4}), typeCallAtomic.getCsr12());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeCallAtomic.getFunct3());
+        assertEquals(BitSet.valueOf(new long[]{4}), typeCallAtomic.getRs1());
+        assertEquals(BitSet.valueOf(new long[]{2}), typeCallAtomic.getRd());
     }
 }
