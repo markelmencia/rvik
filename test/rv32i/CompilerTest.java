@@ -1,4 +1,4 @@
-package test.rv32i;
+package rv32i;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -8,7 +8,6 @@ import java.util.BitSet;
 import org.junit.Test;
 
 import instructions.*;
-import rv32i.Compiler;
 
 public class CompilerTest {
 
@@ -340,5 +339,84 @@ public class CompilerTest {
         assertEquals(BitSet.valueOf(new long[]{2}), typeCallAtomic.getFunct3());
         assertEquals(BitSet.valueOf(new long[]{4}), typeCallAtomic.getRs1());
         assertEquals(BitSet.valueOf(new long[]{2}), typeCallAtomic.getRd());
+    }
+
+    @Test
+    public void testRunInstruction() {
+        Compiler.pc = 0;
+        TypeLui typeLui = new TypeLui(BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{5}));
+        Compiler.runInstruction(typeLui);
+        assertEquals(32, Compiler.pc);
+        assertEquals(8192, Compiler.reg[5]);
+
+        TypeAuipc typeAuipc = new TypeAuipc(BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{3}));
+        Compiler.runInstruction(typeAuipc);
+        assertEquals(64, Compiler.pc);
+        assertEquals(8224, Compiler.reg[3]);
+
+        TypeJ typeJ = new TypeJ(BitSet.valueOf(new long[]{32}), BitSet.valueOf(new long[]{1}));
+        Compiler.runInstruction(typeJ);
+        assertEquals(96, Compiler.pc);
+        assertEquals(96, Compiler.reg[1]);
+
+        TypeJalr typeJalr = new TypeJalr(BitSet.valueOf(new long[]{32}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{0}), BitSet.valueOf(new long[]{2}));
+        Compiler.runInstruction(typeJalr);
+        assertEquals(128, Compiler.pc);
+        assertEquals(128, Compiler.reg[2]);
+
+        // B Type
+        Compiler.reg[1] = 1;
+        Compiler.reg[2] = 2;
+
+        TypeB typeBeq = new TypeB(BitSet.valueOf(new long[]{64}), BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{0}));
+        Compiler.runInstruction(typeBeq);
+        assertEquals(160, Compiler.pc);
+
+        TypeB typeBne = new TypeB(BitSet.valueOf(new long[]{64}), BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{1}));
+        Compiler.runInstruction(typeBne);
+        assertEquals(224, Compiler.pc);
+
+        TypeB typeBlt = new TypeB(BitSet.valueOf(new long[]{64}), BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{4}));
+        Compiler.runInstruction(typeBlt);
+        assertEquals(288, Compiler.pc);
+
+        TypeB typeBge = new TypeB(BitSet.valueOf(new long[]{64}), BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{5}));
+        Compiler.runInstruction(typeBge);
+        assertEquals(320, Compiler.pc);
+
+        TypeB typeBltu = new TypeB(BitSet.valueOf(new long[]{64}), BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{6}));
+        Compiler.runInstruction(typeBltu);
+        assertEquals(384, Compiler.pc);
+
+        TypeB typeBgeu = new TypeB(BitSet.valueOf(new long[]{64}), BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{7}));
+        Compiler.runInstruction(typeBgeu);
+        assertEquals(416, Compiler.pc);
+
+        TypeLoad typeLoad = new TypeLoad(BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{3}));
+        Compiler.reg[1] = 1;
+        Compiler.storeMem(BitSet.valueOf(new long[]{1023}), 2);
+        Compiler.runInstruction(typeLoad);
+        assertEquals(-1, Compiler.reg[3]);
+        assertEquals(448, Compiler.pc);
+
+        TypeS typeS = new TypeS(BitSet.valueOf(new long[]{0}), BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{0}));
+        Compiler.reg[1] = 256;
+        Compiler.reg[2] = 2;
+        Compiler.runInstruction(typeS);
+        assertEquals(-1, Compiler.btis(Compiler.loadMem(2, 8), 8));
+        assertEquals(480, Compiler.pc);
+
+        TypeImm typeImm = new TypeImm(BitSet.valueOf(new long[]{-1}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{0}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{0}));
+        Compiler.reg[1] = 1;
+        Compiler.runInstruction(typeImm);
+        assertEquals(0, Compiler.reg[1]);
+        assertEquals(512, Compiler.pc);
+
+        TypeR typeR = new TypeR(BitSet.valueOf(new long[]{0b0100000}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{2}), BitSet.valueOf(new long[]{0}), BitSet.valueOf(new long[3]));
+        Compiler.reg[1] = 1;
+        Compiler.reg[2] = 2;
+        Compiler.runInstruction(typeR);
+        assertEquals(-1, Compiler.reg[3]);
+        assertEquals(544, Compiler.pc);
     }
 }
