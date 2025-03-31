@@ -22,16 +22,16 @@ public class Compiler {
 	public static BitSet mem = new BitSet(65536); // Size TBD
 
 	public static HashMap<Integer, Instruction> codeopToInstr = new HashMap<Integer, Instruction>() {{
-			put(55,  new TypeLui()); 		// (0110111)
-			put(23,  new TypeAuipc()); 		// (0010111)
-			put(111, new TypeJ()); 			// (1101111)
-			put(103, new TypeJalr()); 		// (1100111)
-			put(99,  new TypeB()); 			// (1100011)
-			put(3, 	 new TypeLoad()); 		// (0000011)
-			put(35,  new TypeS()); 			// (0100011)
-			put(19,  new TypeImm()); 		// (0010011)
-			put(51,  new TypeR());    		// (0110011)
-			put(115, new TypeCallAtomic()); // (1110011)
+			put(0b0110111, new TypeLui()); 		  // (0110111)
+			put(0b0010111, new TypeAuipc()); 	  // (0010111)
+			put(0b1101111, new TypeJ()); 		  // (1101111)
+			put(0b1100111, new TypeJalr()); 	  // (1100111)
+			put(0b1100011, new TypeB()); 		  // (1100011)
+			put(0b0000011, new TypeLoad());   	  // (0000011)
+			put(0b0100011, new TypeS()); 		  // (0100011)
+			put(0b0010011, new TypeImm()); 		  // (0010011)
+			put(0b0110011, new TypeR());    	  // (0110011)
+			put(0b1110011, new TypeCallAtomic()); // (1110011)
 		}};
 	
 	// MEMORY RELATED METHODS
@@ -105,7 +105,7 @@ public class Compiler {
 	 */
 	public static void run() {
 		BitSet instructionArray = getInstr();
-		Instruction instruction; // TODO: test it
+		Instruction instruction;
 			
 		while(!instructionIsEmpty(instructionArray)) {
 			instruction = getInstrType(instructionArray);
@@ -178,22 +178,7 @@ public class Compiler {
 		// Binary to int signed. Due to BitSize having
 		// a dinamic length depending on the last bit set,
 		// a size parameter is needed.
-		/*
-		int result = 0;
-		
-		if (segment.length() < size) {		
-			result = btiu(segment);
-		} else {			
-			for (int i = 0; i < segment.length(); i++) {
-				if (!segment.get(i)) {
-					result = result + ((int) Math.pow(2,i));
-				}
-			}
-			result++;
-			result = 0 - result;
-		}
-		return result;
-		*/
+
 		int result = 0;
 
 		for (int i = 0; i < size; i++) {
@@ -867,10 +852,11 @@ public class Compiler {
 		}
 		jImm21.set(11, instructionArray.get(20));
 		o = 12;
-		for (int i = 11; i <= 20; i++) {
+		for (int i = 12; i <= 19; i++) {
 			jImm21.set(i, instructionArray.get(o));
 			o++;
 		}
+		jImm21.set(20, instructionArray.get(31));
 		/*
 		jImm21.set(0, false);
 		jImm21.set(1, instr.get(21));
@@ -955,11 +941,13 @@ public class Compiler {
 		int o = 7;
 		for (int i = 0; i <= 4; i++) {
 			sImm12.set(i, instructionArray.get(o));
+			o++;
 			}
 
 		o = 25;
 		for (int i = 5; i <= 11; i++) {
 			sImm12.set(i, instructionArray.get(o));
+			o++;
 		}
 		/*
 		sImm12.set(0, instruction.get(7));
@@ -990,11 +978,11 @@ public class Compiler {
 	}
 
 	public static void fillTypeR(BitSet instructionArray, Instruction instruction) {
-		((TypeImm) instruction).setImm12(fillSegment(instructionArray, 20, 31));
-		((TypeImm) instruction).setRs1(fillSegment(instructionArray, 15, 19));
-		((TypeImm) instruction).setFunct3(fillSegment(instructionArray, 12, 14));
-		((TypeImm) instruction).setRd(fillSegment(instructionArray, 7, 11));
-		((TypeImm) instruction).setInstr30(instructionArray.get(30));
+		((TypeR) instruction).setFunct7(fillSegment(instructionArray, 25, 31));
+		((TypeR) instruction).setRs1(fillSegment(instructionArray, 15, 19));
+		((TypeR) instruction).setRs2(fillSegment(instructionArray, 20, 24));
+		((TypeR) instruction).setFunct3(fillSegment(instructionArray, 12, 14));
+		((TypeR) instruction).setRd(fillSegment(instructionArray, 7, 11));
 	}
 
 	public static void fillTypeCallAtomic(BitSet instructionArray, Instruction instruction) {
@@ -1010,15 +998,15 @@ public class Compiler {
 		// instruction type.
 
 		HashMap<Class<? extends Instruction>, Runnable> fillerMap = new HashMap<>() {{
-			put(TypeLui.class,        () -> fillTypeLui(instructionArray, (TypeLui) instruction));
-			put(TypeAuipc.class,      () -> fillTypeAuipc(instructionArray, (TypeAuipc) instruction));
-			put(TypeJ.class,          () -> fillTypeJ(instructionArray, (TypeJ) instruction));
-			put(TypeJalr.class,       () -> fillTypeJalr(instructionArray, (TypeJalr) instruction));
-			put(TypeB.class,          () -> fillTypeB(instructionArray, (TypeB) instruction));
-			put(TypeLoad.class,       () -> fillTypeLoad(instructionArray, (TypeLoad) instruction));
-			put(TypeS.class,          () -> fillTypeS(instructionArray, (TypeS) instruction));
-			put(TypeImm.class,        () -> fillTypeImm(instructionArray, (TypeImm) instruction));
-			put(TypeR.class,          () -> fillTypeR(instructionArray, (TypeR) instruction));
+			put(TypeLui.class,        () -> fillTypeLui(instructionArray,   	 (TypeLui) instruction));
+			put(TypeAuipc.class,      () -> fillTypeAuipc(instructionArray, 	 (TypeAuipc) instruction));
+			put(TypeJ.class,          () -> fillTypeJ(instructionArray, 		 (TypeJ) instruction));
+			put(TypeJalr.class,       () -> fillTypeJalr(instructionArray, 		 (TypeJalr) instruction));
+			put(TypeB.class,          () -> fillTypeB(instructionArray, 		 (TypeB) instruction));
+			put(TypeLoad.class,       () -> fillTypeLoad(instructionArray, 		 (TypeLoad) instruction));
+			put(TypeS.class,          () -> fillTypeS(instructionArray, 		 (TypeS) instruction));
+			put(TypeImm.class,        () -> fillTypeImm(instructionArray, 		 (TypeImm) instruction));
+			put(TypeR.class,          () -> fillTypeR(instructionArray, 		 (TypeR) instruction));
 			put(TypeCallAtomic.class, () -> fillTypeCallAtomic(instructionArray, (TypeCallAtomic) instruction));
 		}};
 
