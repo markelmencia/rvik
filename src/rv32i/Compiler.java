@@ -141,8 +141,8 @@ public class Compiler {
 	/**
 	 * Extends a bit array to a desired bit ammount.
 	 * @param segment The instruction array that will be filtered.
-	 * @param first the first bit of the range.
-	 * @return The extended BitSet
+	 * @param resultBits The desired bit length.
+	 * @return The extended BitSet.
 	 */
 	public static BitSet bitExtension(BitSet segment, int resultBits) {
 		BitSet result = new BitSet(resultBits);
@@ -219,7 +219,7 @@ public class Compiler {
 		int rd = btiu(instruction.getRd());
 		int imm20 = btis(bitExtension(instruction.getImm20(), 32), 32);
 
-		reg[rd] = pc + imm20 << 12; // rd <- pc + imm_u
+		reg[rd] = pc + (imm20 << 12); // rd <- pc + imm_u
 		pc = pc + 32;
 	}
 
@@ -227,7 +227,7 @@ public class Compiler {
 		int rd = btiu(instruction.getRd());
 		int imm21 = btis(instruction.getImm21(), 21);
 
-		reg[rd] = pc + 32; // rd <- pc + 16
+		reg[rd] = pc + 32; // rd <- pc + 32
 		pc = pc + imm21; // pc <- pc + imm_j
 	}
 	
@@ -236,7 +236,7 @@ public class Compiler {
 		int rs1 = btiu(instruction.getRs1());
 		int imm12 = btis(instruction.getImm12(), 12);
 
-		reg[rd] = pc + 32; // rd <- pc + 16
+		reg[rd] = pc + 32; // rd <- pc + 32
 		pc = reg[rs1] + imm12; // pc < rs1 + imm_i
 	}
 
@@ -419,13 +419,13 @@ public class Compiler {
 			put(2, () -> runSw(instruction));
 		}};
 		*/
-		HashMap<Integer, Integer> typeLoadSizes = new HashMap<>() {{ // TODO: move this
+		HashMap<Integer, Integer> typeStoreSizes = new HashMap<>() {{ // TODO: move this
 			put(0, 8);
 			put(1, 16);
 			put(2, 32);
 		}};
 
-		int size = typeLoadSizes.get(btiu(instruction.getFunct3()));
+		int size = typeStoreSizes.get(btiu(instruction.getFunct3()));
 		int rs1 = btiu(instruction.getRs1());
 		int rs2 = btiu(instruction.getRs2());
 		int imm12 = btis(instruction.getImm12(), 12);
@@ -436,7 +436,7 @@ public class Compiler {
 
 	// TODO: check public/private what to choose
 	public static int srlisrai(TypeImm instruction, int rs1, int imm12) {
-		if (instruction.getInstr30() == 0) {
+		if (!instruction.getInstr30().get(0)) {
 			return reg[rs1] >>> imm12;
 		} else {
 			return reg[rs1] >> imm12;
@@ -782,7 +782,7 @@ public class Compiler {
 			codeop.set(i, instr.get(i));
 		}
 
-		Instruction result = codeopToInstr.get(btiu(codeop));
+		return codeopToInstr.get(btiu(codeop));
 		
 		/*
 		if (btiu(codeop) == 55) { // lui (0110111)
@@ -825,8 +825,6 @@ public class Compiler {
 			result = (TypeCallAtomic) new TypeCallAtomic();
 		}
 		*/
-
-		return result;
 	}
 	
 
