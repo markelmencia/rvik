@@ -419,4 +419,9 @@ public class CompilerTest {
         assertEquals(-1, Compiler.reg[3]);
         assertEquals(544, Compiler.pc);
     }
+
+    @Test
+    public void testRun() {
+        // TODO
+    }
 }
