@@ -21,18 +21,18 @@ public class Compiler {
 	public static BitSet pm = new BitSet(65536); // Size TBD
 	public static BitSet mem = new BitSet(65536); // Size TBD
 
-	public static HashMap<Integer, Instruction> codeopToInstr = new HashMap<Integer, Instruction>() {{
-			put(0b0110111, new TypeLui()); 		  // (0110111)
-			put(0b0010111, new TypeAuipc()); 	  // (0010111)
-			put(0b1101111, new TypeJ()); 		  // (1101111)
-			put(0b1100111, new TypeJalr()); 	  // (1100111)
-			put(0b1100011, new TypeB()); 		  // (1100011)
-			put(0b0000011, new TypeLoad());   	  // (0000011)
-			put(0b0100011, new TypeS()); 		  // (0100011)
-			put(0b0010011, new TypeImm()); 		  // (0010011)
-			put(0b0110011, new TypeR());    	  // (0110011)
-			put(0b1110011, new TypeCallAtomic()); // (1110011)
-		}};
+	public static HashMap<Integer, Instruction> codeopToInstr = new HashMap<>() {{
+        put(0b0110111, new TypeLui());          // (0110111)
+        put(0b0010111, new TypeAuipc());      // (0010111)
+        put(0b1101111, new TypeJ());          // (1101111)
+        put(0b1100111, new TypeJalr());      // (1100111)
+        put(0b1100011, new TypeB());          // (1100011)
+        put(0b0000011, new TypeLoad());      // (0000011)
+        put(0b0100011, new TypeS());          // (0100011)
+        put(0b0010011, new TypeImm());          // (0010011)
+        put(0b0110011, new TypeR());          // (0110011)
+        put(0b1110011, new TypeCallAtomic()); // (1110011)
+    }};
 	
 	// MEMORY RELATED METHODS
 	
@@ -59,11 +59,10 @@ public class Compiler {
 	 */
 	public static BitSet loadMem(int address, int size) {
 		BitSet result = new BitSet(size);
-		int start = address;
-		int finish = address + size;
+        int finish = address + size;
 
 		int j = 0;
-		for (int i = start; i < finish; i++) {
+		for (int i = address; i < finish; i++) {
 			result.set(j, mem.get(i));
 			j++;
 		}
@@ -76,11 +75,10 @@ public class Compiler {
 	 * @param address The first address in which the segment will be stored
 	 */
 	public static void storeMem(BitSet segment, int address) {
-		int start = address;
-		int finish = address + segment.length();
+        int finish = address + segment.length();
 		
 		int j = 0;
-		for (int i = start; i < finish; i++) {
+		for (int i = address; i < finish; i++) {
 			mem.set(i, segment.get(j));
 			j++;
 		}
@@ -586,16 +584,16 @@ public class Compiler {
 		// instruction type.
 
 		HashMap<Class<? extends Instruction>, Runnable> fillerMap = new HashMap<>() {{
-			put(TypeLui.class,        () -> fillTypeLui(instructionArray,   	 (TypeLui) instruction));
-			put(TypeAuipc.class,      () -> fillTypeAuipc(instructionArray, 	 (TypeAuipc) instruction));
-			put(TypeJ.class,          () -> fillTypeJ(instructionArray, 		 (TypeJ) instruction));
-			put(TypeJalr.class,       () -> fillTypeJalr(instructionArray, 		 (TypeJalr) instruction));
-			put(TypeB.class,          () -> fillTypeB(instructionArray, 		 (TypeB) instruction));
-			put(TypeLoad.class,       () -> fillTypeLoad(instructionArray, 		 (TypeLoad) instruction));
-			put(TypeS.class,          () -> fillTypeS(instructionArray, 		 (TypeS) instruction));
-			put(TypeImm.class,        () -> fillTypeImm(instructionArray, 		 (TypeImm) instruction));
-			put(TypeR.class,          () -> fillTypeR(instructionArray, 		 (TypeR) instruction));
-			put(TypeCallAtomic.class, () -> fillTypeCallAtomic(instructionArray, (TypeCallAtomic) instruction));
+			put(TypeLui.class,        () -> fillTypeLui(instructionArray, instruction));
+			put(TypeAuipc.class,      () -> fillTypeAuipc(instructionArray, instruction));
+			put(TypeJ.class,          () -> fillTypeJ(instructionArray, instruction));
+			put(TypeJalr.class,       () -> fillTypeJalr(instructionArray, instruction));
+			put(TypeB.class,          () -> fillTypeB(instructionArray, instruction));
+			put(TypeLoad.class,       () -> fillTypeLoad(instructionArray, instruction));
+			put(TypeS.class,          () -> fillTypeS(instructionArray, instruction));
+			put(TypeImm.class,        () -> fillTypeImm(instructionArray, instruction));
+			put(TypeR.class,          () -> fillTypeR(instructionArray, instruction));
+			put(TypeCallAtomic.class, () -> fillTypeCallAtomic(instructionArray, instruction));
 		}};
 
 		Runnable filler = fillerMap.get(instruction.getClass());
