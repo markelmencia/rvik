@@ -76,4 +76,26 @@ public class TypeS extends Instruction {
 		Compiler.storeMem(Compiler.getReg(rs2, size), Compiler.reg[rs1] + imm12);
 		Compiler.pc = Compiler.pc + 32;
 	}
+
+	@Override
+	public void fill(BitSet instructionArray) {
+		BitSet sImm12 = new BitSet(12);
+
+		int o = 7;
+		for (int i = 0; i <= 4; i++) {
+			sImm12.set(i, instructionArray.get(o));
+			o++;
+		}
+
+		o = 25;
+		for (int i = 5; i <= 11; i++) {
+			sImm12.set(i, instructionArray.get(o));
+			o++;
+		}
+
+		this.imm12 = sImm12;
+		this.rs2 = Utils.fillSegment(instructionArray, 20, 24);
+		this.rs1 = Utils.fillSegment(instructionArray, 15, 19);
+		this.funct3 = Utils.fillSegment(instructionArray, 12, 14);
+	}
 }

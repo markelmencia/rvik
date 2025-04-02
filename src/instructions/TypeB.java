@@ -153,4 +153,26 @@ public class TypeB extends Instruction {
 			System.err.println("Error: Type B instruction not found");
 		}
 	}
+
+	@Override
+	public void fill(BitSet instructionArray) {
+		BitSet bImm13 = new BitSet(13);
+
+		int o = 8;
+		for (int i = 1; i <= 4; i++) {
+			bImm13.set(i, instructionArray.get(o));
+			o++;
+		}
+		o = 25;
+		for (int i = 5; i <= 10; i++) {
+			bImm13.set(i, instructionArray.get(o));
+			o++;
+		}
+		bImm13.set(11, instructionArray.get(7));
+		bImm13.set(12, instructionArray.get(31));
+		this.imm13 = bImm13;
+		this.rs2 = Utils.fillSegment(instructionArray, 20, 24);
+		this.rs1 = Utils.fillSegment(instructionArray, 15, 19);
+		this.funct3 = Utils.fillSegment(instructionArray, 12, 14);
+	}
 }

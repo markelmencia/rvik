@@ -69,4 +69,12 @@ public class TypeJalr extends Instruction {
 		Compiler.pc = Compiler.reg[rs1] + imm12; // pc < rs1 + imm_i
 	}
 
+	@Override
+	public void fill(BitSet instructionArray) {
+		this.imm12 = Utils.fillSegment(instructionArray, 20, 31);
+		this.rs1 = Utils.fillSegment(instructionArray, 15, 19);
+		this.funct3 = Utils.fillSegment(instructionArray, 12, 14);
+		this.rd = Utils.fillSegment(instructionArray, 7, 11);
+	}
+
 }

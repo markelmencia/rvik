@@ -1,5 +1,7 @@
 package instructions;
 
+import utils.Utils;
+
 import java.util.BitSet;
 
 public class TypeCallAtomic extends Instruction {
@@ -60,5 +62,13 @@ public class TypeCallAtomic extends Instruction {
 	@Override
 	public void run() {
 
+	}
+
+	@Override
+	public void fill(BitSet instructionArray) {
+		this.csr12 = Utils.fillSegment(instructionArray, 20, 31);
+		this.rs1 = Utils.fillSegment(instructionArray, 15, 19);
+		this.funct3 = Utils.fillSegment(instructionArray, 12, 14);
+		this.rd = Utils.fillSegment(instructionArray, 7, 11);
 	}
 }

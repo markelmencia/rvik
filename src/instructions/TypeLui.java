@@ -39,9 +39,15 @@ public class TypeLui extends Instruction {
 	@Override
 	public void run() {
 		int rd = Utils.btiu(this.rd);
-		int imm20 = Utils.btis(Compiler.bitExtension(this.imm20, 32), 32);
+		int imm20 = Utils.btis(Utils.bitExtension(this.imm20, 32), 32);
 
 		Compiler.reg[rd] = imm20 << 12; // rd <- imm_u
 		Compiler.pc = Compiler.pc + 32;
+	}
+
+	@Override
+	public void fill(BitSet instructionArray) {
+		this.imm20 = Utils.fillSegment(instructionArray, 12, 31);
+		this.rd = Utils.fillSegment(instructionArray, 7, 11);
 	}
 }

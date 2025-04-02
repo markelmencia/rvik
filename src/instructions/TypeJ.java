@@ -45,4 +45,27 @@ public class TypeJ extends Instruction {
 		Compiler.reg[rd] = Compiler.pc + 32; // rd <- pc + 32
 		Compiler.pc = Compiler.pc + imm21; // pc <- pc + imm_j
 	}
+
+	@Override
+	public void fill(BitSet instructionArray) {
+		BitSet jImm21 = new BitSet(21);
+		jImm21.set(0, false);
+
+		// Fills the instruction according to the J Type bit structure
+		int o = 21;
+		for (int i = 1; i <= 10; i++) {
+			jImm21.set(i, instructionArray.get(o));
+			o++;
+		}
+		jImm21.set(11, instructionArray.get(20));
+		o = 12;
+		for (int i = 12; i <= 19; i++) {
+			jImm21.set(i, instructionArray.get(o));
+			o++;
+		}
+		jImm21.set(20, instructionArray.get(31));
+
+		this.imm21 = jImm21;
+		this.rd = Utils.fillSegment(instructionArray, 7, 11);
+	}
 }

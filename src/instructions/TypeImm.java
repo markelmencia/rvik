@@ -86,7 +86,6 @@ public class TypeImm extends Instruction {
 
 	@Override
 	public void run() {
-
 		final HashMap<Integer, Integer> typeImmOperations = new HashMap<>() {{
 
 			int rs1 = Utils.btiu(TypeImm.this.rs1);
@@ -104,5 +103,14 @@ public class TypeImm extends Instruction {
 
 		Compiler.reg[Utils.btiu(this.rd)] = typeImmOperations.get(Utils.btiu(this.funct3));
 		Compiler.pc = Compiler.pc + 32;
+	}
+
+	@Override
+	public void fill(BitSet instructionArray) {
+		this.imm12 = Utils.fillSegment(instructionArray, 20, 31);
+		this.rs1 = Utils.fillSegment(instructionArray, 15, 19);
+		this.funct3 = Utils.fillSegment(instructionArray, 12, 14);
+		this.rd = Utils.fillSegment(instructionArray, 7, 11);
+		this.setInstr30(instructionArray.get(30));
 	}
 }

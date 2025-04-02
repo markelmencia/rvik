@@ -108,4 +108,13 @@ public class TypeR extends Instruction {
 		Compiler.reg[Utils.btiu(this.rd)] = typeROperations.get(Utils.btiu(this.rd));
 		Compiler.pc = Compiler.pc + 32;
 	}
+
+	@Override
+	public void fill(BitSet instructionArray) {
+		this.funct7 = Utils.fillSegment(instructionArray, 25, 31);
+		this.rs1 = Utils.fillSegment(instructionArray, 15, 19);
+		this.rs2 = Utils.fillSegment(instructionArray, 20, 24);
+		this.funct3 = Utils.fillSegment(instructionArray, 12, 14);
+		this.rd = Utils.fillSegment(instructionArray, 7, 11);
+	}
 }

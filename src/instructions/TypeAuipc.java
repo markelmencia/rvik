@@ -46,4 +46,10 @@ public class TypeAuipc extends Instruction {
 		Compiler.reg[rd] = Compiler.pc + (imm20 << 12); // rd <- pc + imm_u
 		Compiler.pc = Compiler.pc + 32;
 	}
+
+	@Override
+	public void fill(BitSet instructionArray) {
+		this.imm20 = fillSegment(instructionArray, 12, 31);
+		this.rd = fillSegment(instructionArray, 7, 11);
+	}
 }
