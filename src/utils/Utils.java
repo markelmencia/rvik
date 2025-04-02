@@ -57,4 +57,24 @@ public class Utils {
         }
         return result;
     }
+
+    /**
+     * Gets an instruction array and a bit range and returns an array filtering
+     * out the rest of the instruction. Used in fillInstr() for simplicity purposes.
+     * @param instr The instruction array that will be filtered.
+     * @param first the first bit of the range.
+     * @param last The last bit of the range.
+     * @return An array of the size of the range, with the bits that haven't been filtered out.
+     */
+    public static BitSet fillSegment(BitSet instr, int first, int last) {
+        int length = last - first + 1;
+        BitSet result = new BitSet(length);
+
+        int o = 0;
+        for (int i = first; i < last + 1; i++) {
+            result.set(o, instr.get(i));
+            o++;
+        }
+        return result;
+    }
 }
