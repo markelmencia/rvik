@@ -1,6 +1,9 @@
 package instructions;
 
 import java.util.BitSet;
+import java.util.HashMap;
+import utils.Utils;
+import rv32i.Compiler;
 
 public class TypeS extends Instruction {
 
@@ -57,7 +60,20 @@ public class TypeS extends Instruction {
 		this.funct3 = new BitSet(3);
 	}
 
-	
+	@Override
+	public void run() {
+		final HashMap<Integer, Integer> typeStoreSizes = new HashMap<>() {{
+			put(0, 8);
+			put(1, 16);
+			put(2, 32);
+		}};
 
-	
+		int size = typeStoreSizes.get(Utils.btiu(this.funct3));
+		int rs1 = Utils.btiu(this.rs1);
+		int rs2 = Utils.btiu(this.rs2);
+		int imm12 = Utils.btis(this.imm12, 12);
+
+		Compiler.storeMem(Compiler.getReg(rs2, size), Compiler.reg[rs1] + imm12);
+		Compiler.pc = Compiler.pc + 32;
+	}
 }

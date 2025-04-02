@@ -1,6 +1,9 @@
 package instructions;
 
 import java.util.BitSet;
+import java.util.HashMap;
+import rv32i.Compiler;
+import utils.Utils;
 
 public class TypeLoad extends Instruction {
 
@@ -55,5 +58,24 @@ public class TypeLoad extends Instruction {
 		this.rs1 = new BitSet(5);
 		this.funct3 = new BitSet(3);
 		this.rd = new BitSet(5);
+	}
+
+	@Override
+	public void run() {
+		HashMap<Integer, Integer> typeLoadSizes = new HashMap<>() {{ // TODO: move this
+			put(0, 16);
+			put(1, 32);
+			put(2, 8);
+			put(4, 8);
+			put(5, 16);
+		}};
+
+		int size = typeLoadSizes.get(Utils.btiu(this.funct3));
+		int rd = Utils.btiu(this.rd);
+		int rs1 = Utils.btiu(this.rs1);
+		int imm12 = Utils.btis(this.imm12, 12);
+
+		Compiler.reg[rd] = Utils.btis(Compiler.loadMem((Compiler.reg[rs1] + imm12), size), size);
+		Compiler.pc = Compiler.pc + 32;
 	}
 }

@@ -22,16 +22,16 @@ public class Compiler {
 	public static BitSet mem = new BitSet(65536); // Size TBD
 
 	public static HashMap<Integer, Instruction> codeopToInstr = new HashMap<>() {{
-        put(0b0110111, new TypeLui());          // (0110111)
-        put(0b0010111, new TypeAuipc());      // (0010111)
-        put(0b1101111, new TypeJ());          // (1101111)
-        put(0b1100111, new TypeJalr());      // (1100111)
-        put(0b1100011, new TypeB());          // (1100011)
-        put(0b0000011, new TypeLoad());      // (0000011)
-        put(0b0100011, new TypeS());          // (0100011)
-        put(0b0010011, new TypeImm());          // (0010011)
-        put(0b0110011, new TypeR());          // (0110011)
-        put(0b1110011, new TypeCallAtomic()); // (1110011)
+        put(0b0110111, new TypeLui());
+        put(0b0010111, new TypeAuipc());
+        put(0b1101111, new TypeJ());
+        put(0b1100111, new TypeJalr());
+        put(0b1100011, new TypeB());
+        put(0b0000011, new TypeLoad());
+        put(0b0100011, new TypeS());
+        put(0b0010011, new TypeImm());
+        put(0b0110011, new TypeR());
+        put(0b1110011, new TypeCallAtomic());
     }};
 	
 	// MEMORY RELATED METHODS
@@ -108,7 +108,7 @@ public class Compiler {
 		while(!instructionIsEmpty(instructionArray)) {
 			instruction = getInstrType(instructionArray);
 			fillInstr(instructionArray, instruction);
-			runInstruction(instruction);
+			instruction.run();
 			reg[0] = 0; // The first register is hardcoded to 0
 			instructionArray = getInstr();
 		}
@@ -202,257 +202,6 @@ public class Compiler {
         	result.set(i, (regValue & (1 << (size - 1 - i))) != 0);
    		}
     	return result;
-	}
-	
-	// TODO: Perhaps move the run functions to each class or w/e
-	public static void runTypeLui(TypeLui instruction) {
-		int rd = btiu(instruction.getRd());
-		int imm20 = btis(bitExtension(instruction.getImm20(), 32), 32);
-
-		reg[rd] = imm20 << 12; // rd <- imm_u
-		pc = pc + 32;
-	}
-
-	public static void runTypeAuipc(TypeAuipc instruction) {		
-		int rd = btiu(instruction.getRd());
-		int imm20 = btis(bitExtension(instruction.getImm20(), 32), 32);
-
-		reg[rd] = pc + (imm20 << 12); // rd <- pc + imm_u
-		pc = pc + 32;
-	}
-
-	public static void runTypeJ(TypeJ instruction) {
-		int rd = btiu(instruction.getRd());
-		int imm21 = btis(instruction.getImm21(), 21);
-
-		reg[rd] = pc + 32; // rd <- pc + 32
-		pc = pc + imm21; // pc <- pc + imm_j
-	}
-	
-	public static void runTypeJalr(TypeJalr instruction) {
-		int rd = btiu(instruction.getRd());
-		int rs1 = btiu(instruction.getRs1());
-		int imm12 = btis(instruction.getImm12(), 12);
-
-		reg[rd] = pc + 32; // rd <- pc + 32
-		pc = reg[rs1] + imm12; // pc < rs1 + imm_i
-	}
-
-	public static void runBeq(TypeB instruction) {
-		int rs1 = btiu(instruction.getRs1());
-		int rs2 = btiu(instruction.getRs2());
-		int imm13 = btis(instruction.getImm13(), 13);
-
-		if (reg[rs1] == reg[rs2]) {
-			pc = pc + imm13;
-		} else {
-			pc = pc + 32;
-		}
-	}
-
-	public static void runBne(TypeB instruction) {
-		int rs1 = btiu(instruction.getRs1());
-		int rs2 = btiu(instruction.getRs2());
-		int imm13 = btis(instruction.getImm13(), 13);
-
-		if (reg[rs1] != reg[rs2]) {
-			pc = pc + imm13;
-		} else {
-			pc = pc + 32;
-		}
-	}
-	// TODO: consider creating new files to shrink size of this one
-
-	public static void runBlt(TypeB instruction) {
-		int rs1 = btiu(instruction.getRs1());
-		int rs2 = btiu(instruction.getRs2());
-		int imm13 = btis(instruction.getImm13(), 13);
-
-		if (reg[rs1] < reg[rs2]) {
-			pc = pc + imm13;
-		} else {
-			pc = pc + 32;
-		}		
-	}
-
-	public static void runBge(TypeB instruction) {
-		int rs1 = btiu(instruction.getRs1());
-		int rs2 = btiu(instruction.getRs2());
-		int imm13 = btis(instruction.getImm13(), 13);
-
-		if (reg[rs1] >= reg[rs2]) {
-			pc = pc + imm13;
-		} else {
-			pc = pc + 32;
-		}
-	}
-
-	public static void runBltu(TypeB instruction) {
-		int rs1 = btiu(instruction.getRs1());
-		int rs2 = btiu(instruction.getRs2());
-		int imm13 = btis(instruction.getImm13(), 13);
-
-		if (Math.abs(reg[rs1]) < Math.abs(reg[rs2])) {
-			pc = pc + imm13;
-		} else {
-			pc = pc + 32;
-		}
-	}
-
-	public static void runBgeu(TypeB instruction) {
-		int rs1 = btiu(instruction.getRs1());
-		int rs2 = btiu(instruction.getRs2());
-		int imm13 = btis(instruction.getImm13(), 13);
-
-		if (Math.abs(reg[rs1]) >= Math.abs(reg[rs2])) {
-			pc = pc + imm13;
-		} else {
-			pc = pc + 32;
-		}
-	}
-
-	public static void runTypeB(TypeB instruction) {
-		HashMap<Integer, Runnable> runTypeB = new HashMap<>() {{ // TODO: move this
-			put(0, () -> runBeq(instruction));
-			put(1, () -> runBne(instruction));
-			put(4, () -> runBlt(instruction));
-			put(5, () -> runBge(instruction));
-			put(6, () -> runBltu(instruction));
-			put(7, () -> runBgeu(instruction));
-		}};
-
-		Runnable function = runTypeB.get(btiu(instruction.getFunct3()));
-		if (function != null) {
-			function.run();
-		} else {
-			System.err.println("Error: Type B instruction not found");
-		}
-	}
-
-	// TODO: change int sizes to be more optimized
-	public static void runTypeLoad(TypeLoad instruction) {
-		HashMap<Integer, Integer> typeLoadSizes = new HashMap<>() {{ // TODO: move this
-			put(0, 16);
-			put(1, 32);
-			put(2, 8);
-			put(4, 8);
-			put(5, 16);
-		}};
-
-		int size = typeLoadSizes.get(btiu(instruction.getFunct3()));
-		int rd = btiu(instruction.getRd());
-		int rs1 = btiu(instruction.getRs1());
-		int imm12 = btis(instruction.getImm12(), 12);
-		
-		reg[rd] = btis(loadMem((reg[rs1] + imm12), size), size);
-		pc = pc + 32;		
-	}
-
-	public static void runTypeS(TypeS instruction) {
-		HashMap<Integer, Integer> typeStoreSizes = new HashMap<>() {{ // TODO: move this
-			put(0, 8);
-			put(1, 16);
-			put(2, 32);
-		}};
-
-		int size = typeStoreSizes.get(btiu(instruction.getFunct3()));
-		int rs1 = btiu(instruction.getRs1());
-		int rs2 = btiu(instruction.getRs2());
-		int imm12 = btis(instruction.getImm12(), 12);
-
-		storeMem(getReg(rs2, size), reg[rs1] + imm12);
-		pc = pc + 32;
-	}
-
-	// TODO: check public/private what to choose
-	public static int srlisrai(TypeImm instruction, int rs1, int imm12) {
-		if (!instruction.getInstr30().get(0)) {
-			return reg[rs1] >>> imm12;
-		} else {
-			return reg[rs1] >> imm12;
-		}
-	}
-
-	public static void runTypeImm(TypeImm instruction) {
-
-		HashMap<Integer, Integer> typeImmOperations = new HashMap<>() {{ // TODO: move this
-
-			int rs1 = btiu(instruction.getRs1());
-			int imm12 = btis(instruction.getImm12(), 12);
-
-			put(0, reg[rs1] + imm12); // addi
-			put(1, reg[rs1] << imm12); // slli
-			put(2, reg[rs1] < imm12 ? 1 : 0); // slti
-			put(3, Math.abs(reg[rs1]) < Math.abs(imm12) ? 1 : 0); // slitu
-			put(4, reg[rs1] ^ imm12); // xori
-			put(5, srlisrai(instruction, rs1, imm12)); // srli / srai
-			put(6, reg[rs1] | imm12); // ori
-			put(7, reg[rs1] & imm12); // andi
-		}};
-
-		reg[btiu(instruction.getRd())] = typeImmOperations.get(btiu(instruction.getFunct3()));
-		pc = pc + 32;
-	}
-
-	public static int addsub(TypeR instruction, int rs1, int rs2) {
-		if (btiu(instruction.getFunct7()) == 0) {
-			return reg[rs1] + reg[rs2];
-		} else {
-			return reg[rs1] - reg[rs2];
-		}
-	}
-
-	public static int srlsra(TypeR instruction, int rs1, int rs2) {
-		if (btiu(instruction.getFunct7()) == 0) { // srl
-			return reg[rs1] >>> reg[rs2];
-		} else { // sra
-			return reg[rs1] >> reg[rs2];
-		}
-	}
-
-	// TODO: fix that you acces btiu multiple tkimes when you can just do it int he beginnign of the funciton
-
-	public static void runTypeR(TypeR instruction) {
-
-		HashMap<Integer, Integer> typeROperations = new HashMap<>() {{ // TODO: move this
-
-			int rs1 = btiu(instruction.getRs1());
-			int rs2 = btiu(instruction.getRs2());
-
-			put(0, addsub(instruction, rs1, rs2)); // addi
-			put(1, reg[rs1] << reg[rs2]); // sll
-			put(2, reg[rs1] < reg[rs2] ? 1 : 0); // slt
-			put(3, Math.abs(reg[rs1]) < Math.abs(reg[rs2]) ? 1 : 0); // slit
-			put(4, reg[rs1] ^ reg[rs2]); // xor
-			put(5, srlsra(instruction, rs1, rs2)); // srl / sra
-			put(6, reg[rs1] | reg[rs2]); // or
-			put(7, reg[rs1] & reg[rs2]); // and
-		}};
-
-		reg[btiu(instruction.getRd())] = typeROperations.get(btiu(instruction.getFunct3()));
-		pc = pc + 32;
-	}
-
-	public static void runInstruction(Instruction instruction) {
-		
-		HashMap<Class<? extends Instruction>, Runnable> run = new HashMap<>() {{ // TODO: Perhaps move this to the global scope
-			put(TypeLui.class,   () -> runTypeLui((TypeLui) instruction));
-			put(TypeAuipc.class, () -> runTypeAuipc((TypeAuipc) instruction));
-			put(TypeJ.class,     () -> runTypeJ((TypeJ) instruction));
-			put(TypeJalr.class,  () -> runTypeJalr((TypeJalr) instruction));
-			put(TypeB.class,     () -> runTypeB((TypeB) instruction));
-			put(TypeLoad.class,  () -> runTypeLoad((TypeLoad) instruction));
-			put(TypeS.class,     () -> runTypeS((TypeS) instruction));
-			put(TypeImm.class,   () -> runTypeImm((TypeImm) instruction));
-			put(TypeR.class,     () -> runTypeR((TypeR) instruction));
-		}};
-
-		Runnable function = run.get(instruction.getClass());  // Get the Runnable based on the instruction's class
-		if (function != null) {
-			function.run();
-		} else {
-			System.out.println("Error: Instruction type not found");
-		}
 	}
 	
 	// Returns the specific instruction object (its type) via the given instruction's code operation.

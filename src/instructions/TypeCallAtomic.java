@@ -56,7 +56,9 @@ public class TypeCallAtomic extends Instruction {
 		this.funct3 = funct3;
 		this.rd = rd;
 	}
-	
-	
-	
+
+	@Override
+	public void run() {
+
+	}
 }

@@ -1,6 +1,8 @@
 package instructions;
 
 import java.util.BitSet;
+import rv32i.Compiler;
+import utils.Utils;
 
 public class TypeJalr extends Instruction {
 
@@ -55,6 +57,16 @@ public class TypeJalr extends Instruction {
 		this.rs1 = new BitSet(5);
 		this.funct3 = new BitSet(3);
 		this.rd = new BitSet(5);
+	}
+
+	@Override
+	public void run() {
+		int rd = Utils.btiu(this.rd);
+		int rs1 = Utils.btiu(this.rs1);
+		int imm12 = Utils.btis(this.imm12, 12);
+
+		Compiler.reg[rd] = Compiler.pc + 32; // rd <- pc + 32
+		Compiler.pc = Compiler.reg[rs1] + imm12; // pc < rs1 + imm_i
 	}
 
 }

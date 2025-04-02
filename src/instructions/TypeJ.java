@@ -1,6 +1,8 @@
 package instructions;
 
 import java.util.BitSet;
+import utils.Utils;
+import rv32i.Compiler;
 
 public class TypeJ extends Instruction {
 
@@ -33,5 +35,14 @@ public class TypeJ extends Instruction {
 		super();
 		this.imm21 = new BitSet(21);
 		this.rd = new BitSet(5);
+	}
+
+	@Override
+	public void run() {
+		int rd = Utils.btiu(this.rd);
+		int imm21 = Utils.btis(this.imm21, 21);
+
+		Compiler.reg[rd] = Compiler.pc + 32; // rd <- pc + 32
+		Compiler.pc = Compiler.pc + imm21; // pc <- pc + imm_j
 	}
 }

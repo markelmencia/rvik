@@ -1,6 +1,9 @@
 package instructions;
 
 import java.util.BitSet;
+import java.util.HashMap;
+import utils.Utils;
+import rv32i.Compiler;
 
 public class TypeImm extends Instruction {
 
@@ -9,6 +12,7 @@ public class TypeImm extends Instruction {
 	private BitSet funct3;
 	private BitSet rd;
 	private BitSet instr30;
+
 	
 	public BitSet getImm12() {
 		return imm12;
@@ -70,5 +74,35 @@ public class TypeImm extends Instruction {
 		this.funct3 = new BitSet(3);
 		this.rd = new BitSet(5);
 		this.instr30 = new BitSet(1);
+	}
+
+	public static int srlisrai(TypeImm instruction, int rs1, int imm12) {
+		if (!instruction.getInstr30().get(0)) {
+			return Compiler.reg[rs1] >>> imm12;
+		} else {
+			return Compiler.reg[rs1] >> imm12;
+		}
+	}
+
+	@Override
+	public void run() {
+
+		final HashMap<Integer, Integer> typeImmOperations = new HashMap<>() {{
+
+			int rs1 = Utils.btiu(TypeImm.this.rs1);
+			int imm12 = Utils.btis(TypeImm.this.imm12, 12);
+
+			put(0, Compiler.reg[rs1] + imm12); // addi
+			put(1, Compiler.reg[rs1] << imm12); // slli
+			put(2, Compiler.reg[rs1] < imm12 ? 1 : 0); // slti
+			put(3, Math.abs(Compiler.reg[rs1]) < Math.abs(imm12) ? 1 : 0); // slitu
+			put(4, Compiler.reg[rs1] ^ imm12); // xori
+			put(5, srlisrai(TypeImm.this, rs1, imm12)); // srli / srai
+			put(6, Compiler.reg[rs1] | imm12); // ori
+			put(7, Compiler.reg[rs1] & imm12); // andi
+		}};
+
+		Compiler.reg[Utils.btiu(this.rd)] = typeImmOperations.get(Utils.btiu(this.funct3));
+		Compiler.pc = Compiler.pc + 32;
 	}
 }

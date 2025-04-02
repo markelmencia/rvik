@@ -1,5 +1,7 @@
 package instructions;
 import java.util.BitSet;
+import rv32i.Compiler;
+import utils.Utils;
 
 public class TypeLui extends Instruction {
 
@@ -32,5 +34,14 @@ public class TypeLui extends Instruction {
 		super();
 		this.imm20 = new BitSet(20);
 		this.rd = new BitSet(5);
+	}
+
+	@Override
+	public void run() {
+		int rd = Utils.btiu(this.rd);
+		int imm20 = Utils.btis(Compiler.bitExtension(this.imm20, 32), 32);
+
+		Compiler.reg[rd] = imm20 << 12; // rd <- imm_u
+		Compiler.pc = Compiler.pc + 32;
 	}
 }

@@ -1,5 +1,9 @@
 package instructions;
 import java.util.BitSet;
+import utils.Utils;
+import rv32i.Compiler;
+
+import static utils.Utils.*;
 
 public class TypeAuipc extends Instruction {
 
@@ -34,4 +38,12 @@ public class TypeAuipc extends Instruction {
 		this.rd = new BitSet(5);
 	}
 
+	@Override
+	public void run() {
+		int rd = btiu(this.rd);
+		int imm20 = btis(bitExtension(this.imm20, 32), 32);
+
+		Compiler.reg[rd] = Compiler.pc + (imm20 << 12); // rd <- pc + imm_u
+		Compiler.pc = Compiler.pc + 32;
+	}
 }
