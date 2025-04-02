@@ -2,6 +2,7 @@ package rv32i;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import utils.Utils;
 
 import java.util.BitSet;
 
@@ -56,14 +57,14 @@ public class CompilerTest {
             segment.set(i); // 15
         }
 
-        assertEquals(15, Compiler.btiu(segment));
+        assertEquals(15, Utils.btiu(segment));
 
         BitSet segment2 = new BitSet(4);
         for (int i = 0; i < 3; i++) {
             segment2.set(i); // 7
         }
 
-        assertEquals(7, Compiler.btiu(segment2));
+        assertEquals(7, Utils.btiu(segment2));
     }
 
     @Test
@@ -73,14 +74,14 @@ public class CompilerTest {
             segment.set(i); // -1
         }
 
-        assertEquals(-1, Compiler.btis(segment, 4));
+        assertEquals(-1, Utils.btis(segment, 4));
 
         BitSet segment2 = new BitSet(4);
         for (int i = 0; i < 3; i++) {
             segment2.set(i); // 7
         }
 
-        assertEquals(7, Compiler.btis(segment2, 4));
+        assertEquals(7, Utils.btis(segment2, 4));
     }
 
     @Test
@@ -118,7 +119,7 @@ public class CompilerTest {
             extendedBitSet.set(i);
         }
 
-        assertEquals(extendedBitSet, Compiler.bitExtension(bitSet, 32));
+        assertEquals(extendedBitSet, Utils.bitExtension(bitSet, 32));
     }
 
     @Test
@@ -169,7 +170,7 @@ public class CompilerTest {
             set(7);
             set(9);
         }};
-        Compiler.fillInstr(luiBitSet, typeLui);
+        typeLui.fill(luiBitSet);
         assertEquals(BitSet.valueOf(new long[]{7}), typeLui.getImm20());
         assertEquals(BitSet.valueOf(new long[]{5}), typeLui.getRd());
         
@@ -182,7 +183,7 @@ public class CompilerTest {
              // rd
              set(8);
         }};
-        Compiler.fillInstr(auipcBitSet, typeAuipc);
+        typeAuipc.fill(auipcBitSet);
         assertEquals(BitSet.valueOf(new long[]{5}), typeAuipc.getImm20());
         assertEquals(BitSet.valueOf(new long[]{2}), typeAuipc.getRd());
 
@@ -196,7 +197,7 @@ public class CompilerTest {
             // rd
             set(9);
        }};
-       Compiler.fillInstr(jBitSet, typeJ);
+       typeJ.fill(jBitSet);
        // The purpose of this number in particular is to test
        // the bit reallocation that occurs in the jal assembly
        assertEquals(BitSet.valueOf(new long[]{1052674}), typeJ.getImm21());
@@ -213,7 +214,7 @@ public class CompilerTest {
             // imm12
             set(20);
         }};
-        Compiler.fillInstr(jalrBitSet, typeJalr);
+        typeJalr.fill(jalrBitSet);
 
         assertEquals(BitSet.valueOf(new long[]{3}), typeJalr.getRd());
         assertEquals(BitSet.valueOf(new long[]{8}), typeJalr.getRs1());
@@ -234,7 +235,7 @@ public class CompilerTest {
             // rs2
             set(22);
         }};
-        Compiler.fillInstr(bBitSet, typeB);
+        typeB.fill(bBitSet);
 
         assertEquals(BitSet.valueOf(new long[]{6178}), typeB.getImm13());
         assertEquals(BitSet.valueOf(new long[]{4}), typeB.getFunct3());
@@ -253,7 +254,7 @@ public class CompilerTest {
             // imm12
             set(22);
         }};
-        Compiler.fillInstr(loadBitSet, typeLoad);
+        typeLoad.fill(loadBitSet);
 
         assertEquals(BitSet.valueOf(new long[]{4}), typeLoad.getImm12());
         assertEquals(BitSet.valueOf(new long[]{2}), typeLoad.getFunct3());
@@ -273,7 +274,7 @@ public class CompilerTest {
             set(8);
             set(25);
         }};
-        Compiler.fillInstr(sBitSet, typeS);
+        typeS.fill(sBitSet);
 
         assertEquals(BitSet.valueOf(new long[]{34}), typeS.getImm12());
         assertEquals(BitSet.valueOf(new long[]{2}), typeS.getFunct3());
@@ -292,7 +293,7 @@ public class CompilerTest {
             // imm12
             set(22);
         }};
-        Compiler.fillInstr(immBitSet, typeImm);
+        typeImm.fill(immBitSet);
 
         assertEquals(BitSet.valueOf(new long[]{4}), typeImm.getImm12());
         assertEquals(BitSet.valueOf(new long[]{2}), typeImm.getFunct3());
@@ -313,7 +314,7 @@ public class CompilerTest {
             // funct7
             set(25);
         }};
-        Compiler.fillInstr(rBitSet, typeR);
+        typeR.fill(rBitSet);
 
         assertEquals(BitSet.valueOf(new long[]{1}), typeR.getFunct7());
         assertEquals(BitSet.valueOf(new long[]{2}), typeR.getFunct3());
@@ -333,7 +334,7 @@ public class CompilerTest {
             // csr12
             set(22);
         }};
-        Compiler.fillInstr(callAtomicBitSet, typeCallAtomic);
+        typeCallAtomic.fill(callAtomicBitSet);
 
         assertEquals(BitSet.valueOf(new long[]{4}), typeCallAtomic.getCsr12());
         assertEquals(BitSet.valueOf(new long[]{2}), typeCallAtomic.getFunct3());
@@ -403,7 +404,7 @@ public class CompilerTest {
         Compiler.reg[1] = 256;
         Compiler.reg[2] = 2;
        typeS.run();
-        assertEquals(-1, Compiler.btis(Compiler.loadMem(2, 8), 8));
+        assertEquals(-1, Utils.btis(Compiler.loadMem(2, 8), 8));
         assertEquals(480, Compiler.pc);
 
         TypeImm typeImm = new TypeImm(BitSet.valueOf(new long[]{-1}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{0}), BitSet.valueOf(new long[]{1}), BitSet.valueOf(new long[]{0}));
