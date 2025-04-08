@@ -52,4 +52,20 @@ public class TypeAuipc extends Instruction {
 		this.imm20 = fillSegment(instructionArray, 12, 31);
 		this.rd = fillSegment(instructionArray, 7, 11);
 	}
+
+	public static BitSet assemble(String[] instructionSplit) {
+		BitSet result = new BitSet(32);
+		// opcode
+		result.or(BitSet.valueOf(new long[]{0b1110100}));
+
+		// rd
+		long rd = Integer.parseInt(instructionSplit[1]);
+		result.or(BitSet.valueOf(new long[]{rd << 7}));
+
+		// imm20
+		long imm20 = Integer.parseInt(instructionSplit[2]);
+		result.or(BitSet.valueOf(new long[]{imm20 << 12}));
+
+		return result;
+	}
 }

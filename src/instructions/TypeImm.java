@@ -13,6 +13,17 @@ public class TypeImm extends Instruction {
 	private BitSet rd;
 	private BitSet instr30;
 
+	private static final HashMap<String, Byte> stringToFunct3 = new HashMap<>() {{
+		put("addi", (byte) 0);
+		put("slti", (byte) 2);
+		put("sltiu", (byte) 3);
+		put("xori", (byte) 4);
+		put("ori", (byte) 6);
+		put("andi", (byte) 7);
+		put("slli", (byte) 1);
+		put("srli", (byte) 5);
+		put("srai", (byte) 5);
+	}};
 	
 	public BitSet getImm12() {
 		return imm12;
@@ -112,5 +123,35 @@ public class TypeImm extends Instruction {
 		this.funct3 = Utils.fillSegment(instructionArray, 12, 14);
 		this.rd = Utils.fillSegment(instructionArray, 7, 11);
 		this.setInstr30(instructionArray.get(30));
+	}
+
+
+	public static BitSet assemble(String[] instructionSplit) {
+		BitSet result = new BitSet(32);
+		// opcode
+		result.or(BitSet.valueOf(new long[]{0b0110111}));
+
+		// rd
+		long rd = Integer.parseInt(instructionSplit[1]);
+		result.or(BitSet.valueOf(new long[]{rd << 7}));
+
+		// funct3
+		byte funct3 = stringToFunct3.get(instructionSplit[0]);
+		result.or(BitSet.valueOf(new long[]{funct3 << 12}));
+
+		// rs1
+		int rs1 = Integer.parseInt(instructionSplit[2]);
+		result.or(BitSet.valueOf(new long[]{rs1}));
+
+		// imm12
+		int imm12 = Integer.parseInt(instructionSplit[3]);
+		result.or(BitSet.valueOf(new long[]{(long) imm12 << 20}));
+
+		// instr30
+		if (instructionSplit[0].equals("srai")) {
+			result.set(30);
+		}
+
+		return result;
 	}
 }

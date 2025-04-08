@@ -12,7 +12,20 @@ public class TypeR extends Instruction {
 	private BitSet rs2;
 	private BitSet funct3;
 	private BitSet rd;
-	
+
+	private static final HashMap<String, Byte> stringToFunct3 = new HashMap<>() {{
+		put("add", (byte) 0);
+		put("sub", (byte) 0);
+		put("sll", (byte) 1);
+		put("slt", (byte) 2);
+		put("sltu", (byte) 3);
+		put("xor", (byte) 4);
+		put("srl", (byte) 5);
+		put("sra", (byte) 5);
+		put("or", (byte) 6);
+		put("and", (byte) 7);
+	}};
+
 	public BitSet getFunct7() {
 		return funct7;
 	}
@@ -116,5 +129,34 @@ public class TypeR extends Instruction {
 		this.rs2 = Utils.fillSegment(instructionArray, 20, 24);
 		this.funct3 = Utils.fillSegment(instructionArray, 12, 14);
 		this.rd = Utils.fillSegment(instructionArray, 7, 11);
+	}
+
+	public static BitSet assemble(String[] instructionSplit) {
+		BitSet result = new BitSet(32);
+		// opcode
+		result.or(BitSet.valueOf(new long[]{0b0110111}));
+
+		// rd
+		long rd = Integer.parseInt(instructionSplit[1]);
+		result.or(BitSet.valueOf(new long[]{rd << 7}));
+
+		// funct3
+		byte funct3 = stringToFunct3.get(instructionSplit[0]);
+		result.or(BitSet.valueOf(new long[]{funct3 << 12}));
+
+		// rs1
+		int rs1 = Integer.parseInt(instructionSplit[2]);
+		result.or(BitSet.valueOf(new long[]{(long) rs1 << 15}));
+
+		// rs2
+		int rs2 = Integer.parseInt(instructionSplit[2]);
+		result.or(BitSet.valueOf(new long[]{(long) rs2 << 20}));
+
+		// instr30
+		if (instructionSplit[0].equals("sub") || instructionSplit[0].equals("sra")) {
+			result.set(30);
+		}
+
+		return result;
 	}
 }

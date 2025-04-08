@@ -11,35 +11,41 @@ public class TypeS extends Instruction {
 	private BitSet rs2;
 	private BitSet rs1;
 	private BitSet funct3;
-	
+
+	private static final HashMap<String, Byte> stringToFunct3 = new HashMap<>() {{
+		put("sb", (byte) 0);
+		put("sh", (byte) 1);
+		put("sw", (byte) 2);
+	}};
+
 	public BitSet getImm12() {
 		return imm12;
 	}
-	
+
 	public void setImm12(BitSet imm12) {
 		this.imm12 = imm12;
 	}
-	
+
 	public BitSet getRs2() {
 		return rs2;
 	}
-	
+
 	public void setRs2(BitSet rs2) {
 		this.rs2 = rs2;
 	}
-	
+
 	public BitSet getRs1() {
 		return rs1;
 	}
-	
+
 	public void setRs1(BitSet rs1) {
 		this.rs1 = rs1;
 	}
-	
+
 	public BitSet getFunct3() {
 		return funct3;
 	}
-	
+
 	public void setFunct3(BitSet funct3) {
 		this.funct3 = funct3;
 	}
@@ -51,7 +57,7 @@ public class TypeS extends Instruction {
 		this.rs1 = rs1;
 		this.funct3 = funct3;
 	}
-	
+
 	public TypeS() {
 		super();
 		this.imm12 = new BitSet(7);
@@ -97,5 +103,42 @@ public class TypeS extends Instruction {
 		this.rs2 = Utils.fillSegment(instructionArray, 20, 24);
 		this.rs1 = Utils.fillSegment(instructionArray, 15, 19);
 		this.funct3 = Utils.fillSegment(instructionArray, 12, 14);
+	}
+
+	public static BitSet assemble(String[] instructionSplit) {
+		BitSet result = new BitSet(32);
+		// opcode
+		result.or(BitSet.valueOf(new long[]{0b0110111}));
+
+		// imm12
+		int imm12 = Integer.parseInt(instructionSplit[2]);
+		BitSet imm12Array = BitSet.valueOf(new long[]{imm12});
+		int o = 0;
+		for (int i = 7; i <= 11; i++) {
+			result.set(i, imm12Array.get(o));
+			o++;
+		}
+		// funct3
+		byte funct3 = stringToFunct3.get(instructionSplit[0]);
+		result.or(BitSet.valueOf(new long[]{funct3 << 12}));
+
+		// rs1
+		if (instructionSplit.length != 3) {
+			int rs1 = Integer.parseInt(instructionSplit[3]);
+			result.or(BitSet.valueOf(new long[]{(long) rs1 << 15}));
+		}
+
+		// rs2
+		int rs2 = Integer.parseInt(instructionSplit[1]);
+		result.or(BitSet.valueOf(new long[]{(long) rs2 << 20}));
+
+		// imm7
+		for (int i = 25; i <= 30; i++) {
+			result.set(i, imm12Array.get(o));
+		}
+
+		result.set(31, imm12Array.get(11));
+
+		return result;
 	}
 }

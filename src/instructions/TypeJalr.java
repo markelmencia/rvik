@@ -77,4 +77,22 @@ public class TypeJalr extends Instruction {
 		this.rd = Utils.fillSegment(instructionArray, 7, 11);
 	}
 
+	public static BitSet assemble(String[] instructionSplit) {
+		BitSet result = new BitSet(32);
+		// opcode
+		result.or(BitSet.valueOf(new long[]{0b1100111}));
+
+		// rd
+		long rd = Integer.parseInt(instructionSplit[1]);
+		result.or(BitSet.valueOf(new long[]{rd << 7}));
+
+		// rs1
+		int rs1 = Integer.parseInt(instructionSplit[3]);
+		result.or(BitSet.valueOf(new long[]{(long) rs1 << 15}));
+
+		// imm12
+		result.or(BitSet.valueOf(new long[]{(long) rs1 << 20}));
+
+		return result;
+	}
 }

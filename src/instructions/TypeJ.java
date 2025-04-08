@@ -68,4 +68,34 @@ public class TypeJ extends Instruction {
 		this.imm21 = jImm21;
 		this.rd = Utils.fillSegment(instructionArray, 7, 11);
 	}
+
+	public static BitSet assemble(String[] instructionSplit) {
+		BitSet result = new BitSet(32);
+		// opcode
+		result.or(BitSet.valueOf(new long[]{0b1101111}));
+
+		// rd
+		long rd = Integer.parseInt(instructionSplit[1]);
+		result.or(BitSet.valueOf(new long[]{rd << 7}));
+
+		// imm21
+		int imm21 = Integer.parseInt(instructionSplit[2]);
+		BitSet imm20Array = BitSet.valueOf(new long[]{imm21});
+
+		for (int i = 12; i <= 19; i++) {
+			result.set(i, imm20Array.get(i));
+		}
+
+		result.set(20, imm20Array.get(11));
+
+		int o = 1;
+		for (int i = 21; i <= 30; i++) {
+			result.set(21, imm20Array.get(o));
+			o++;
+		}
+
+		result.set(31, imm20Array.get(20));
+
+		return result;
+	}
 }
