@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 public class Assembler {
 
-	private static final HashMap<String, Function<String[], BitSet>> splitToBitSet = new HashMap<>() {{
+	public static final HashMap<String, Function<String[], BitSet>> splitToBitSet = new HashMap<>() {{
 		put("lui",   TypeLui::assemble);
 		put("auipc", TypeAuipc::assemble);
 		put("jal",   TypeJ::assemble);
@@ -74,29 +74,23 @@ public class Assembler {
 	 * @param FILE_DIR The file path
 	 */
 	public static void assembleFile(String FILE_DIR) {
-		
 		File file = new File(FILE_DIR);
-		int j = 0;
+		int p = 0;
 		try {
 			Scanner scanner = new Scanner(file);
 			BitSet instruction;
-			Main.output += "Program file is: " + FILE_DIR + "\n";
-			
-			Main.output += "\nPROGRAM INSTRUCTIONS\n--------------------------";
 			
 			while (scanner.hasNextLine()) {
 				String instructionString = scanner.nextLine();
-				Main.output += "\n    " + instructionString;
 				instruction = assembleString(instructionString);
 				for (int i = 0; i < 32; i++) {
-					Compiler.pm.set(j, instruction.get(i));
-					j++;
+					Compiler.pm.set(p, instruction.get(i));
+					p++;
 				}
 			}
-			Main.output += "\n--------------------------\n";
 			scanner.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			System.err.println("Error: Could not assemble the file:" + e);
 		}
 	}
 
