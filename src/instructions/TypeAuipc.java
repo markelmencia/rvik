@@ -56,7 +56,7 @@ public class TypeAuipc extends Instruction {
 	public static BitSet assemble(String[] instructionSplit) {
 		BitSet result = new BitSet(32);
 		// opcode
-		result.or(BitSet.valueOf(new long[]{0b1110100}));
+		result.or(BitSet.valueOf(new long[]{0b0010111}));
 
 		// rd
 		long rd = Integer.parseInt(instructionSplit[1]);

@@ -129,7 +129,7 @@ public class TypeImm extends Instruction {
 	public static BitSet assemble(String[] instructionSplit) {
 		BitSet result = new BitSet(32);
 		// opcode
-		result.or(BitSet.valueOf(new long[]{0b0110111}));
+		result.or(BitSet.valueOf(new long[]{0b0010011}));
 
 		// rd
 		long rd = Integer.parseInt(instructionSplit[1]);
@@ -141,7 +141,7 @@ public class TypeImm extends Instruction {
 
 		// rs1
 		int rs1 = Integer.parseInt(instructionSplit[2]);
-		result.or(BitSet.valueOf(new long[]{rs1}));
+		result.or(BitSet.valueOf(new long[]{(long) rs1 << 15}));
 
 		// imm12
 		int imm12 = Integer.parseInt(instructionSplit[3]);

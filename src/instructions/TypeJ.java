@@ -80,21 +80,21 @@ public class TypeJ extends Instruction {
 
 		// imm21
 		int imm21 = Integer.parseInt(instructionSplit[2]);
-		BitSet imm20Array = BitSet.valueOf(new long[]{imm21});
+		BitSet imm21Array = BitSet.valueOf(new long[]{imm21});
 
 		for (int i = 12; i <= 19; i++) {
-			result.set(i, imm20Array.get(i));
+			result.set(i, imm21Array.get(i));
 		}
 
-		result.set(20, imm20Array.get(11));
+		result.set(20, imm21Array.get(11));
 
 		int o = 1;
 		for (int i = 21; i <= 30; i++) {
-			result.set(21, imm20Array.get(o));
+			result.set(i, imm21Array.get(o));
 			o++;
 		}
 
-		result.set(31, imm20Array.get(20));
+		result.set(31, imm21Array.get(20));
 
 		return result;
 	}

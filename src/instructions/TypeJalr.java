@@ -91,7 +91,8 @@ public class TypeJalr extends Instruction {
 		result.or(BitSet.valueOf(new long[]{(long) rs1 << 15}));
 
 		// imm12
-		result.or(BitSet.valueOf(new long[]{(long) rs1 << 20}));
+		int imm12 = Integer.parseInt(instructionSplit[2]);
+		result.or(BitSet.valueOf(new long[]{(long) imm12 << 20}));
 
 		return result;
 	}

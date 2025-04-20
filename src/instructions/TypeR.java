@@ -134,7 +134,7 @@ public class TypeR extends Instruction {
 	public static BitSet assemble(String[] instructionSplit) {
 		BitSet result = new BitSet(32);
 		// opcode
-		result.or(BitSet.valueOf(new long[]{0b0110111}));
+		result.or(BitSet.valueOf(new long[]{0b0110011}));
 
 		// rd
 		long rd = Integer.parseInt(instructionSplit[1]);
@@ -149,7 +149,7 @@ public class TypeR extends Instruction {
 		result.or(BitSet.valueOf(new long[]{(long) rs1 << 15}));
 
 		// rs2
-		int rs2 = Integer.parseInt(instructionSplit[2]);
+		int rs2 = Integer.parseInt(instructionSplit[3]);
 		result.or(BitSet.valueOf(new long[]{(long) rs2 << 20}));
 
 		// instr30

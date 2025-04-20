@@ -108,7 +108,7 @@ public class TypeS extends Instruction {
 	public static BitSet assemble(String[] instructionSplit) {
 		BitSet result = new BitSet(32);
 		// opcode
-		result.or(BitSet.valueOf(new long[]{0b0110111}));
+		result.or(BitSet.valueOf(new long[]{0b0100011}));
 
 		// imm12
 		int imm12 = Integer.parseInt(instructionSplit[2]);
