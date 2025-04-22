@@ -142,13 +142,7 @@ public class Compiler {
 	 */
 	public static BitSet getReg(int regIndex, int size) {
     	int regValue = reg[regIndex];
-    	BitSet result = new BitSet(size);
-    
-    	for (int i = 0; i < size; i++) {
-        	// Masks the specific bit that is about to be set/unset and checks if it's set
-        	result.set(i, (regValue & (1 << (size - 1 - i))) != 0);
-   		}
-    	return result;
+    	return BitSet.valueOf(new long[]{regValue});
 	}
 	
 	// Returns the specific instruction object (its type) via the given instruction's code operation.
