@@ -103,12 +103,12 @@ public class TypeR extends Instruction {
 
 	@Override
 	public void run() {
-		HashMap<Integer, Integer> typeROperations = new HashMap<>() {{ // TODO: move this
+		HashMap<Integer, Integer> typeROperations = new HashMap<>() {{
 
 			int rs1 = Utils.btiu(TypeR.this.getRs1());
 			int rs2 = Utils.btiu(TypeR.this.getRs2());
 
-			put(0, addsub(TypeR.this, rs1, rs2)); // addi
+			put(0, addsub(TypeR.this, rs1, rs2)); // add
 			put(1, Compiler.reg[rs1] << Compiler.reg[rs2]); // sll
 			put(2, Compiler.reg[rs1] < Compiler.reg[rs2] ? 1 : 0); // slt
 			put(3, Math.abs(Compiler.reg[rs1]) < Math.abs(Compiler.reg[rs2]) ? 1 : 0); // slit
@@ -118,7 +118,7 @@ public class TypeR extends Instruction {
 			put(7, Compiler.reg[rs1] & Compiler.reg[rs2]); // and
 		}};
 
-		Compiler.reg[Utils.btiu(this.rd)] = typeROperations.get(Utils.btiu(this.rd));
+		Compiler.reg[Utils.btiu(this.rd)] = typeROperations.get(Utils.btiu(this.funct3));
 		Compiler.pc = Compiler.pc + 32;
 	}
 
