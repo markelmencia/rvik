@@ -8,6 +8,8 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -22,10 +24,14 @@ public class Editor extends JFrame {
 
     public Editor() {
         setTitle("rvik");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        JPanel tAreaPanel = new JPanel();
+        this.addWindowListener(new WindowAdapter(){
+            public void windowClosing(WindowEvent e){
+               close(tAreaPanel);
+            }
+        });
 
         // Text area
-        JPanel tAreaPanel = new JPanel();
         tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor"));
         tArea = new JTextArea(40, 100);
         tArea.setLineWrap(true);
@@ -78,8 +84,7 @@ public class Editor extends JFrame {
         JMenuItem preferencesFile = new JMenuItem("Preferences...");
         saveAsFile.setMnemonic(KeyEvent.VK_P);
 
-        JMenuItem closeFile = new JMenuItem("Close");
-        closeFile.setMnemonic(KeyEvent.VK_C);
+        JMenuItem closeFile = getJMenuItem(tAreaPanel);
 
         fileMenu.add(newFile);
         fileMenu.add(openFile);
@@ -164,6 +169,15 @@ public class Editor extends JFrame {
         setVisible(true);
     }
 
+    private JMenuItem getJMenuItem(JPanel tAreaPanel) {
+        JMenuItem closeFile = new JMenuItem("Close");
+        closeFile.setMnemonic(KeyEvent.VK_C);
+        closeFile.addActionListener(actionEvent -> {
+            close(tAreaPanel);
+        });
+        return closeFile;
+    }
+
     private File openFile() {
         JFileChooser fileChooser = new JFileChooser();
         int selection = fileChooser.showOpenDialog(this);
@@ -219,5 +233,19 @@ public class Editor extends JFrame {
             JOptionPane.showMessageDialog(null, "Error when opening file");
         }
 
+    }
+
+    private void close(JPanel tAreaPanel) {
+        if (file != null || !tArea.getText().isEmpty()) {
+            int option = JOptionPane.showConfirmDialog(null, "Do you want to save before closing?", "Close", JOptionPane.YES_NO_OPTION);
+            if (option == JOptionPane.YES_OPTION) {
+                saveFile(tAreaPanel);
+            } else if (option == JOptionPane.CLOSED_OPTION) {
+                return;
+            }
+            System.exit(0);
+        } else {
+            System.exit(0);
+        }
     }
 }
