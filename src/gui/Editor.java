@@ -8,14 +8,16 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Editor extends JFrame {
 
-    private File file;
+    private File file = null;
     private static JTextArea tArea;
 
     public Editor() {
@@ -63,7 +65,26 @@ public class Editor extends JFrame {
         saveFile.setMnemonic(KeyEvent.VK_S);
         KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         saveFile.setAccelerator(ctrlS);
-        saveFile.addActionListener(actionEvent -> System.out.println("Save"));
+        saveFile.addActionListener(actionEvent -> {
+            if (file != null) {
+                try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(file))) {
+                    tArea.write(fileOut);
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, "Could not save the file", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+                Thread t = new Thread(() -> {
+                    tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor (saved)"));
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor"));
+                });
+                t.start();
+            }
+        });
 
         JMenuItem saveAsFile = new JMenuItem("Save As");
         saveAsFile.setMnemonic(KeyEvent.VK_A);
@@ -174,5 +195,4 @@ public class Editor extends JFrame {
         }
 
     }
-
 }
