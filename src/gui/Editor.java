@@ -107,11 +107,26 @@ public class Editor extends JFrame {
         });
         selectAllEdit.setMnemonic(KeyEvent.VK_S);
         JMenuItem cutEdit = new JMenuItem("Cut");
+        KeyStroke ctrlX = KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        cutEdit.setAccelerator(ctrlX);
+        cutEdit.addActionListener(actionEvent -> {
+            tArea.cut();
+        });
         cutEdit.setMnemonic(KeyEvent.VK_C);
         JMenuItem copyEdit = new JMenuItem("Copy");
+        KeyStroke ctrlC = KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        copyEdit.setAccelerator(ctrlC);
+        copyEdit.addActionListener(actionEvent -> {
+            tArea.copy();
+        });
         copyEdit.setMnemonic(KeyEvent.VK_O);
         JMenuItem pasteEdit = new JMenuItem("Paste");
         pasteEdit.setMnemonic(KeyEvent.VK_P);
+        KeyStroke ctrlV = KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        pasteEdit.setAccelerator(ctrlV);
+        pasteEdit.addActionListener(actionEvent -> {
+            tArea.paste();
+        });
 
         editMenu.add(undoEdit);
         editMenu.add(redoEdit);
