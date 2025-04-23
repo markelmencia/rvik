@@ -1,6 +1,9 @@
 package gui;
 
+import rv32i.Compiler;
+
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.undo.CannotRedoException;
@@ -25,6 +28,7 @@ public class Editor extends JFrame {
     public Editor() {
         setTitle("rvik");
         JPanel tAreaPanel = new JPanel();
+        tAreaPanel.setLayout(new BorderLayout());
         this.addWindowListener(new WindowAdapter(){
             public void windowClosing(WindowEvent e){
                close(tAreaPanel);
@@ -162,8 +166,29 @@ public class Editor extends JFrame {
         menuBar.add(editMenu);
         menuBar.add(helpMenu);
 
+        Object[][] data = new Object[Compiler.reg.length + 1][2];
+        for (int i = 0; i < Compiler.reg.length; i++) {
+            data[i][0] = i;
+            data[i][1] = Compiler.reg[i];
+        }
+            data[32][0] = "PC";
+            data[32][1] = Compiler.pc;
+
+        // Column name
+        String[] columnNames = {"Register", "Value"};
+
+        JTable table = new JTable(data, columnNames);
+        JScrollPane tableSP = new JScrollPane(table);
+        tableSP.setBorder(new TitledBorder(new EtchedBorder(), "Register values"));
+        table.getColumnModel().getColumn(0).setPreferredWidth(30);
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);
+        table.setFont(table.getFont().deriveFont(17F));
+        table.setRowHeight(20);
+
+
         setJMenuBar(menuBar);
         add(tAreaPanel);
+        add(tableSP, BorderLayout.EAST);
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
