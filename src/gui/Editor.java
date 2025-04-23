@@ -66,28 +66,14 @@ public class Editor extends JFrame {
         KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         saveFile.setAccelerator(ctrlS);
         saveFile.addActionListener(actionEvent -> {
-            if (file != null) {
-                try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(file))) {
-                    tArea.write(fileOut);
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, "Could not save the file", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-
-                Thread t = new Thread(() -> {
-                    tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor (saved)"));
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor"));
-                });
-                t.start();
-            }
+            saveFile(tAreaPanel);
         });
 
         JMenuItem saveAsFile = new JMenuItem("Save As");
         saveAsFile.setMnemonic(KeyEvent.VK_A);
+        saveAsFile.addActionListener(actionEvent -> {
+           saveAsFile();
+        });
 
         JMenuItem preferencesFile = new JMenuItem("Preferences...");
         saveAsFile.setMnemonic(KeyEvent.VK_P);
@@ -185,6 +171,45 @@ public class Editor extends JFrame {
             return fileChooser.getSelectedFile();
         }
         return null;
+    }
+
+    private void saveFile(JPanel tAreaPanel) {
+        if (file != null) {
+            try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(file))) {
+                tArea.write(fileOut);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Could not save the file", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            Thread t = new Thread(() -> {
+                tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor (saved)"));
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor"));
+            });
+            t.start();
+        } else {
+            saveAsFile();
+        }
+    }
+
+    private void saveAsFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save As");
+
+        int userSelection = fileChooser.showSaveDialog(null);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(file))) {
+                tArea.write(fileOut);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Could not save the file", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private static void setTAreaText(File file) {
