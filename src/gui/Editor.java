@@ -99,6 +99,12 @@ public class Editor extends JFrame {
         redoEdit.setMnemonic(KeyEvent.VK_R);
 
         JMenuItem selectAllEdit = new JMenuItem("Select All");
+        KeyStroke ctrlA = KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        selectAllEdit.setAccelerator(ctrlA);
+        selectAllEdit.addActionListener(actionEvent -> {
+            tArea.requestFocusInWindow();
+            tArea.selectAll();
+        });
         selectAllEdit.setMnemonic(KeyEvent.VK_S);
         JMenuItem cutEdit = new JMenuItem("Cut");
         cutEdit.setMnemonic(KeyEvent.VK_C);
