@@ -1,5 +1,6 @@
 package gui;
 
+import rv32i.Assembler;
 import rv32i.Compiler;
 
 import javax.swing.*;
@@ -7,6 +8,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.MaskFormatter;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -20,31 +22,36 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
+import java.util.BitSet;
 
 public class Editor extends JFrame {
 
     private File file = null;
     private static JTextArea tArea;
+    private DefaultTableModel model;
+    private int instructionsPerSecond = 1000;
+    private JButton runButton;
 
     public Editor() {
         setTitle("rvik");
         JPanel tAreaPanel = new JPanel();
         tAreaPanel.setLayout(new BorderLayout());
-        this.addWindowListener(new WindowAdapter(){
-            public void windowClosing(WindowEvent e){
-               close(tAreaPanel);
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                close(tAreaPanel);
             }
         });
 
         // Text area
         tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor"));
-        tArea = new JTextArea(40, 100);
+        tArea = new JTextArea(40, 90);
         tArea.setLineWrap(true);
         UndoManager undoManager = new UndoManager();
         tArea.getDocument().addUndoableEditListener(undoManager);
 
         JScrollPane tAreaSP = new JScrollPane(tArea);
-        tAreaSP.setVerticalScrollBarPolicy (ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        tAreaSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         tAreaPanel.add(tAreaSP);
 
         // JMmenu
@@ -83,7 +90,7 @@ public class Editor extends JFrame {
         JMenuItem saveAsFile = new JMenuItem("Save As");
         saveAsFile.setMnemonic(KeyEvent.VK_A);
         saveAsFile.addActionListener(actionEvent -> {
-           saveAsFile();
+            saveAsFile();
         });
 
         JMenuItem preferencesFile = new JMenuItem("Preferences...");
@@ -167,18 +174,54 @@ public class Editor extends JFrame {
         menuBar.add(editMenu);
         menuBar.add(helpMenu);
 
-        Object[][] data = new Object[Compiler.reg.length + 1][2];
-        for (int i = 0; i < Compiler.reg.length; i++) {
-            data[i][0] = i;
-            data[i][1] = Compiler.reg[i];
+        // Left panel
+        JPanel leftPanel = new JPanel(new GridLayout(0, 1));
+
+        JPanel assembleButtonPanel = new JPanel();
+        JButton assembleButton = new JButton("Assemble");
+        assembleButton.addActionListener(actionEvent -> {
+            try {
+                Assembler.assembleFile(file.getPath());
+                runButton.setEnabled(true);
+                JOptionPane.showMessageDialog(null, "The file has been assembled correctly");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "The file could not be assembled", "Error", JOptionPane.ERROR_MESSAGE);
+                // Resets program memory
+                Compiler.pm = new BitSet(65536);
+                runButton.setEnabled(false);
+            }
+        });
+        assembleButtonPanel.add(assembleButton);
+        leftPanel.add(assembleButtonPanel);
+
+        JPanel runButtonPanel = new JPanel();
+        runButton = new JButton("Run");
+        runButton.setEnabled(false);
+        runButton.addActionListener(actionEvent -> {
+            Assembler.assembleFile(file.getPath());
+            Compiler.run(instructionsPerSecond);
+            refreshTable(model);
+        });
+        runButtonPanel.add(runButton);
+        leftPanel.add(runButtonPanel);
+
+        MaskFormatter tfFormatter = null;
+        try {
+            tfFormatter = new MaskFormatter("#####");
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-            data[32][0] = "PC";
-            data[32][1] = Compiler.pc;
+        JPanel instructionPerSecondPanel = new JPanel();
 
-        // Column name
-        String[] columnNames = {"Register", "Value"};
+        JFormattedTextField formattedTF = new JFormattedTextField(tfFormatter);
+        formattedTF.setText("1000");
+        instructionPerSecondPanel.add(new JLabel("Instructions per second:"));
+        instructionPerSecondPanel.add(formattedTF);
+        leftPanel.add(instructionPerSecondPanel);
 
-        DefaultTableModel model = new DefaultTableModel(new String[]{"Register", "Value"}, 0);
+
+        // Register table
+        model = new DefaultTableModel(new String[]{"Register", "Value"}, 0);
 
         JTable table = new JTable(model);
         JScrollPane tableSP = new JScrollPane(table);
@@ -192,6 +235,7 @@ public class Editor extends JFrame {
 
         setJMenuBar(menuBar);
         add(tAreaPanel);
+        add(leftPanel, BorderLayout.WEST);
         add(tableSP, BorderLayout.EAST);
         pack();
         setLocationRelativeTo(null);
@@ -283,5 +327,6 @@ public class Editor extends JFrame {
         for (int i = 0; i < Compiler.reg.length; i++) {
             model.addRow(new Object[]{i, Compiler.reg[i]});
         }
+        model.addRow(new Object[]{"PC", Compiler.pc});
     }
 }
