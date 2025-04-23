@@ -8,8 +8,15 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Editor extends JFrame {
+
+    private File file;
+    private static JTextArea tArea;
 
     public Editor() {
         setTitle("rvik");
@@ -18,7 +25,7 @@ public class Editor extends JFrame {
         // Text area
         JPanel tAreaPanel = new JPanel();
         tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor"));
-        JTextArea tArea = new JTextArea(40, 100);
+        tArea = new JTextArea(40, 100);
         tArea.setLineWrap(true);
         UndoManager undoManager = new UndoManager();
         tArea.getDocument().addUndoableEditListener(undoManager);
@@ -44,7 +51,13 @@ public class Editor extends JFrame {
         openFile.setMnemonic(KeyEvent.VK_O);
         KeyStroke ctrlO = KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         openFile.setAccelerator(ctrlO);
-        openFile.addActionListener(actionEvent -> System.out.println("Open"));
+        openFile.addActionListener(actionEvent -> {
+            File openedFile = this.openFile();
+            if (openedFile != null) {
+                file = openedFile;
+                setTAreaText(file);
+            }
+        });
 
         JMenuItem saveFile = new JMenuItem("Save");
         saveFile.setMnemonic(KeyEvent.VK_S);
@@ -109,24 +122,18 @@ public class Editor extends JFrame {
         JMenuItem cutEdit = new JMenuItem("Cut");
         KeyStroke ctrlX = KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         cutEdit.setAccelerator(ctrlX);
-        cutEdit.addActionListener(actionEvent -> {
-            tArea.cut();
-        });
+        cutEdit.addActionListener(actionEvent -> tArea.cut());
         cutEdit.setMnemonic(KeyEvent.VK_C);
         JMenuItem copyEdit = new JMenuItem("Copy");
         KeyStroke ctrlC = KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         copyEdit.setAccelerator(ctrlC);
-        copyEdit.addActionListener(actionEvent -> {
-            tArea.copy();
-        });
+        copyEdit.addActionListener(actionEvent -> tArea.copy());
         copyEdit.setMnemonic(KeyEvent.VK_O);
         JMenuItem pasteEdit = new JMenuItem("Paste");
         pasteEdit.setMnemonic(KeyEvent.VK_P);
         KeyStroke ctrlV = KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         pasteEdit.setAccelerator(ctrlV);
-        pasteEdit.addActionListener(actionEvent -> {
-            tArea.paste();
-        });
+        pasteEdit.addActionListener(actionEvent -> tArea.paste());
 
         editMenu.add(undoEdit);
         editMenu.add(redoEdit);
@@ -149,4 +156,23 @@ public class Editor extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
+
+    private File openFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        int selection = fileChooser.showOpenDialog(this);
+        if (selection == JFileChooser.APPROVE_OPTION) {
+            return fileChooser.getSelectedFile();
+        }
+        return null;
+    }
+
+    private static void setTAreaText(File file) {
+        try {
+            tArea.setText(Files.readString(Path.of(file.getPath())));
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error when opening file");
+        }
+
+    }
+
 }
