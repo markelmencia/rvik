@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -49,7 +50,7 @@ public class Editor extends JFrame {
         // JMmenu
         JMenuBar menuBar = new JMenuBar();
 
-        // File JMenuItems´
+        // File JMenuItems
         JMenu fileMenu = new JMenu("File");
         fileMenu.setMnemonic(KeyEvent.VK_F);
 
@@ -177,13 +178,16 @@ public class Editor extends JFrame {
         // Column name
         String[] columnNames = {"Register", "Value"};
 
-        JTable table = new JTable(data, columnNames);
+        DefaultTableModel model = new DefaultTableModel(new String[]{"Register", "Value"}, 0);
+
+        JTable table = new JTable(model);
         JScrollPane tableSP = new JScrollPane(table);
         tableSP.setBorder(new TitledBorder(new EtchedBorder(), "Register values"));
         table.getColumnModel().getColumn(0).setPreferredWidth(30);
         table.getColumnModel().getColumn(1).setPreferredWidth(100);
         table.setFont(table.getFont().deriveFont(17F));
         table.setRowHeight(20);
+        refreshTable(model);
 
 
         setJMenuBar(menuBar);
@@ -271,6 +275,13 @@ public class Editor extends JFrame {
             System.exit(0);
         } else {
             System.exit(0);
+        }
+    }
+
+    public void refreshTable(DefaultTableModel model) {
+        model.setRowCount(0);
+        for (int i = 0; i < Compiler.reg.length; i++) {
+            model.addRow(new Object[]{i, Compiler.reg[i]});
         }
     }
 }
