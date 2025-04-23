@@ -3,9 +3,10 @@ package gui;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 public class Editor extends JFrame {
@@ -19,6 +20,9 @@ public class Editor extends JFrame {
         tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor"));
         JTextArea tArea = new JTextArea(40, 100);
         tArea.setLineWrap(true);
+        UndoManager undoManager = new UndoManager();
+        tArea.getDocument().addUndoableEditListener(undoManager);
+
         JScrollPane tAreaSP = new JScrollPane(tArea);
         tAreaSP.setVerticalScrollBarPolicy (ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         tAreaPanel.add(tAreaSP);
@@ -34,34 +38,19 @@ public class Editor extends JFrame {
         newFile.setMnemonic(KeyEvent.VK_N);
         KeyStroke ctrlN = KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         newFile.setAccelerator(ctrlN);
-        newFile.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println("New");
-            }
-        });
+        newFile.addActionListener(actionEvent -> System.out.println("New"));
 
         JMenuItem openFile = new JMenuItem("Open...");
         openFile.setMnemonic(KeyEvent.VK_O);
         KeyStroke ctrlO = KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         openFile.setAccelerator(ctrlO);
-        openFile.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println("Open");
-            }
-        });
+        openFile.addActionListener(actionEvent -> System.out.println("Open"));
 
         JMenuItem saveFile = new JMenuItem("Save");
         saveFile.setMnemonic(KeyEvent.VK_S);
         KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         saveFile.setAccelerator(ctrlS);
-        saveFile.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println("Save");
-            }
-        });
+        saveFile.addActionListener(actionEvent -> System.out.println("Save"));
 
         JMenuItem saveAsFile = new JMenuItem("Save As");
         saveAsFile.setMnemonic(KeyEvent.VK_A);
@@ -88,23 +77,25 @@ public class Editor extends JFrame {
         JMenuItem undoEdit = new JMenuItem("Undo");
         KeyStroke ctrlZ = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
         undoEdit.setAccelerator(ctrlZ);
-        undoEdit.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println("Undo");
+        undoEdit.addActionListener(actionEvent -> {
+            try {
+                undoManager.undo();
+            } catch (CannotUndoException ignored) {
             }
+
         });
         undoEdit.setMnemonic(KeyEvent.VK_U);
 
         JMenuItem redoEdit = new JMenuItem("Redo");
-        KeyStroke ctrlY = KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
-        redoEdit.setAccelerator(ctrlY);
-        redoEdit.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println("Redo");
+        redoEdit.addActionListener(actionEvent -> {
+            try {
+                undoManager.redo();
+            } catch (CannotRedoException ignored) {
             }
         });
+
+        KeyStroke ctrlY = KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
+        redoEdit.setAccelerator(ctrlY);
         redoEdit.setMnemonic(KeyEvent.VK_R);
 
         JMenuItem selectAllEdit = new JMenuItem("Select All");
