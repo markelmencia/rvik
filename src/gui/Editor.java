@@ -7,6 +7,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
 import javax.swing.undo.CannotRedoException;
@@ -30,7 +32,6 @@ public class Editor extends JFrame {
     private File file = null;
     private static JTextArea tArea;
     private DefaultTableModel model;
-    private int instructionsPerSecond = 1000;
     private JButton runButton;
 
     public Editor() {
@@ -175,50 +176,39 @@ public class Editor extends JFrame {
         menuBar.add(helpMenu);
 
         // Left panel
-        JPanel leftPanel = new JPanel(new GridLayout(0, 1));
+        JPanel leftPanel = new JPanel();
+        leftPanel.setBorder(new TitledBorder(new EtchedBorder(), "Simulator"));
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
 
-        JPanel assembleButtonPanel = new JPanel();
         JButton assembleButton = new JButton("Assemble");
         assembleButton.addActionListener(actionEvent -> {
-            try {
-                Assembler.assembleFile(file.getPath());
-                runButton.setEnabled(true);
-                JOptionPane.showMessageDialog(null, "The file has been assembled correctly");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "The file could not be assembled", "Error", JOptionPane.ERROR_MESSAGE);
-                // Resets program memory
-                Compiler.pm = new BitSet(65536);
-                runButton.setEnabled(false);
+            if (file != null) {
+                try {
+                    Assembler.assembleFile(file.getPath());
+                    runButton.setEnabled(true);
+                    JOptionPane.showMessageDialog(null, "The file has been assembled correctly");
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "The file could not be assembled", "Error", JOptionPane.ERROR_MESSAGE);
+                    // Resets program memory
+                    Compiler.pm = new BitSet(65536);
+                    runButton.setEnabled(false);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Please save the file before assembling");
             }
         });
-        assembleButtonPanel.add(assembleButton);
-        leftPanel.add(assembleButtonPanel);
+        assembleButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        leftPanel.add(assembleButton);
+        leftPanel.add(Box.createVerticalStrut(10));
 
-        JPanel runButtonPanel = new JPanel();
         runButton = new JButton("Run");
         runButton.setEnabled(false);
         runButton.addActionListener(actionEvent -> {
-            Assembler.assembleFile(file.getPath());
-            Compiler.run(instructionsPerSecond);
+            Compiler.run();
             refreshTable(model);
         });
-        runButtonPanel.add(runButton);
-        leftPanel.add(runButtonPanel);
-
-        MaskFormatter tfFormatter = null;
-        try {
-            tfFormatter = new MaskFormatter("#####");
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        JPanel instructionPerSecondPanel = new JPanel();
-
-        JFormattedTextField formattedTF = new JFormattedTextField(tfFormatter);
-        formattedTF.setText("1000");
-        instructionPerSecondPanel.add(new JLabel("Instructions per second:"));
-        instructionPerSecondPanel.add(formattedTF);
-        leftPanel.add(instructionPerSecondPanel);
-
+        runButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        leftPanel.add(runButton);
 
         // Register table
         model = new DefaultTableModel(new String[]{"Register", "Value"}, 0);
@@ -291,6 +281,7 @@ public class Editor extends JFrame {
 
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
+            this.file = file;
             try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(file))) {
                 tArea.write(fileOut);
             } catch (IOException e) {

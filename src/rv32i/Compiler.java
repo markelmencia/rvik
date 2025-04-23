@@ -102,7 +102,7 @@ public class Compiler {
 	/**
 	 * Runs a program. The instructions will execute until an empty instruction is found.
 	 */
-	public static void run(int instructionsPerSecond) {
+	public static void run() {
 		BitSet instructionArray = getInstr();
 		Instruction instruction;
 			
@@ -112,11 +112,6 @@ public class Compiler {
 			instruction.run();
 			reg[0] = 0; // The first register is hardcoded to 0
 			instructionArray = getInstr();
-            try {
-                Thread.sleep(1 / instructionsPerSecond);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
 	}
 	
