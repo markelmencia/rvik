@@ -2,6 +2,7 @@ package gui;
 
 import rv32i.Assembler;
 import rv32i.Compiler;
+import utils.MemorySegment;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -9,6 +10,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
 import javax.swing.undo.CannotRedoException;
@@ -43,6 +45,21 @@ public class Editor extends JFrame {
                 close(tAreaPanel);
             }
         });
+
+        JTable memoryTable = new JTable(11, 11);
+        JScrollPane memoryTableSP = new JScrollPane(memoryTable);
+        memoryTableSP.setBorder(new TitledBorder(new EtchedBorder(), "Register values"));
+        memoryTable.getColumnModel().getColumn(0).setPreferredWidth(30);
+        memoryTable.getColumnModel().getColumn(1).setPreferredWidth(100);
+        memoryTable.setFont(memoryTable.getFont().deriveFont(17F));
+        memoryTable.setRowHeight(20);
+        memoryTable.getColumnModel().getColumn(0).setPreferredWidth(80);
+        setHeaders(memoryTable);
+        refreshMemoryTable(memoryTable);
+        memoryTable.setDefaultRenderer(Object.class, new TableRenderer());
+
+        // Tabbed pane
+        JTabbedPane tabbedPane = new JTabbedPane();
 
         // Text area
         tAreaPanel.setBorder(new TitledBorder(new EtchedBorder(), "Editor"));
@@ -184,6 +201,7 @@ public class Editor extends JFrame {
         assembleButton.addActionListener(actionEvent -> {
             if (file != null) {
                 try {
+                    saveFile(tAreaPanel);
                     Assembler.assembleFile(file.getPath());
                     runButton.setEnabled(true);
                     JOptionPane.showMessageDialog(null, "The file has been assembled correctly");
@@ -204,8 +222,10 @@ public class Editor extends JFrame {
         runButton = new JButton("Run");
         runButton.setEnabled(false);
         runButton.addActionListener(actionEvent -> {
+            Compiler.pc = 0;
             Compiler.run();
             refreshTable(model);
+            refreshMemoryTable(memoryTable);
         });
         runButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         leftPanel.add(runButton);
@@ -222,9 +242,11 @@ public class Editor extends JFrame {
         table.setRowHeight(20);
         refreshTable(model);
 
+        tabbedPane.addTab("Editor", tAreaPanel);
+        tabbedPane.addTab("Data Memory", memoryTableSP);
 
         setJMenuBar(menuBar);
-        add(tAreaPanel);
+        add(tabbedPane);
         add(leftPanel, BorderLayout.WEST);
         add(tableSP, BorderLayout.EAST);
         pack();
@@ -254,6 +276,7 @@ public class Editor extends JFrame {
         if (file != null) {
             try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(file))) {
                 tArea.write(fileOut);
+                this.file = new File(file.getPath());
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, "Could not save the file", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -319,5 +342,45 @@ public class Editor extends JFrame {
             model.addRow(new Object[]{i, Compiler.reg[i]});
         }
         model.addRow(new Object[]{"PC", Compiler.pc});
+    }
+
+
+    void setHeaders(JTable table) {
+        for (int i = 1; i < table.getColumnCount(); i++) {
+            table.setValueAt(((i - 1) * 32), 0, i);
+        }
+        for (int i = 1; i < table.getRowCount(); i++) {
+            table.setValueAt((i - 1) * 10 * 32, i, 0);
+        }
+    }
+
+    void refreshMemoryTable(JTable table) {
+        int k = 0;
+        for (int i = 1; i < 11; i++) {
+            for (int j = 1; j < 11; j++) {
+                table.setValueAt(new MemorySegment(k).getValue(), i, j);
+                k += 32;
+            }
+        }
+    }
+
+    private class TableRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setOpaque(true);
+            if (row == 0 && column == 0) {
+                value = "Address";
+            }
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+
+
+            if (row == 0 || column == 0) {
+                c.setBackground(Color.GRAY.brighter());
+            } else {
+                c.setBackground(Color.WHITE);
+            }
+            return this;
+        }
     }
 }
