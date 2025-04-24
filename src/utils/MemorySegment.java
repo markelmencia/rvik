@@ -15,15 +15,15 @@ public class MemorySegment {
         this.value = value;
     }
 
-    public MemorySegment(int address) {
-        value = getSegmentLong(address);
+    public MemorySegment(int address, BitSet bitset) {
+        value = getSegmentLong(address, bitset);
     }
 
-    public static int getSegmentLong(int address) {
+    public static int getSegmentLong(int address, BitSet bitSet) {
         int value = 0;
         int o = 0;
         for (int i = address; i < address + 32; i++) {
-            value += Compiler.mem.get(i) ? (1 << o) : 0;
+            value += bitSet.get(i) ? (1 << o) : 0;
             o++;
         }
         return value;
