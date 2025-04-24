@@ -5,14 +5,10 @@ import rv32i.Compiler;
 import utils.MemorySegment;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.text.MaskFormatter;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -26,7 +22,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.ParseException;
 import java.util.BitSet;
 
 public class Editor extends JFrame {
@@ -46,17 +41,29 @@ public class Editor extends JFrame {
             }
         });
 
-        JTable memoryTable = new JTable(11, 11);
+        JTable memoryTable = new JTable(110, 11);
         JScrollPane memoryTableSP = new JScrollPane(memoryTable);
-        memoryTableSP.setBorder(new TitledBorder(new EtchedBorder(), "Register values"));
+        memoryTableSP.setBorder(new TitledBorder(new EtchedBorder(), "Data Memory"));
         memoryTable.getColumnModel().getColumn(0).setPreferredWidth(30);
         memoryTable.getColumnModel().getColumn(1).setPreferredWidth(100);
         memoryTable.setFont(memoryTable.getFont().deriveFont(17F));
         memoryTable.setRowHeight(20);
         memoryTable.getColumnModel().getColumn(0).setPreferredWidth(80);
         setHeaders(memoryTable);
-        refreshMemoryTable(memoryTable);
+        refreshBitSetTable(memoryTable, Compiler.mem);
         memoryTable.setDefaultRenderer(Object.class, new TableRenderer());
+
+        JTable pmTable = new JTable(110, 11);
+        JScrollPane pmTableSP = new JScrollPane(pmTable);
+        pmTableSP.setBorder(new TitledBorder(new EtchedBorder(), "Program Memory"));
+        pmTable.getColumnModel().getColumn(0).setPreferredWidth(30);
+        pmTable.getColumnModel().getColumn(1).setPreferredWidth(100);
+        pmTable.setFont(memoryTable.getFont().deriveFont(17F));
+        pmTable.setRowHeight(20);
+        pmTable.getColumnModel().getColumn(0).setPreferredWidth(80);
+        setHeaders(pmTable);
+        refreshBitSetTable(pmTable, Compiler.pm);
+        pmTable.setDefaultRenderer(Object.class, new TableRenderer());
 
         // Tabbed pane
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -203,6 +210,7 @@ public class Editor extends JFrame {
                 try {
                     saveFile(tAreaPanel);
                     Assembler.assembleFile(file.getPath());
+                    refreshBitSetTable(pmTable, Compiler.pm);
                     runButton.setEnabled(true);
                     JOptionPane.showMessageDialog(null, "The file has been assembled correctly");
                 } catch (Exception e) {
@@ -225,7 +233,7 @@ public class Editor extends JFrame {
             Compiler.pc = 0;
             Compiler.run();
             refreshTable(model);
-            refreshMemoryTable(memoryTable);
+            refreshBitSetTable(memoryTable, Compiler.mem);
         });
         runButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         leftPanel.add(runButton);
@@ -238,12 +246,13 @@ public class Editor extends JFrame {
         tableSP.setBorder(new TitledBorder(new EtchedBorder(), "Register values"));
         table.getColumnModel().getColumn(0).setPreferredWidth(30);
         table.getColumnModel().getColumn(1).setPreferredWidth(100);
-        table.setFont(table.getFont().deriveFont(17F));
-        table.setRowHeight(20);
+        table.setFont(table.getFont().deriveFont(18F));
+        table.setRowHeight(21);
         refreshTable(model);
 
         tabbedPane.addTab("Editor", tAreaPanel);
         tabbedPane.addTab("Data Memory", memoryTableSP);
+        tabbedPane.addTab("Program Memory", pmTableSP);
 
         setJMenuBar(menuBar);
         add(tabbedPane);
@@ -354,15 +363,16 @@ public class Editor extends JFrame {
         }
     }
 
-    void refreshMemoryTable(JTable table) {
+    void refreshBitSetTable(JTable table, BitSet bitset) {
         int k = 0;
-        for (int i = 1; i < 11; i++) {
-            for (int j = 1; j < 11; j++) {
-                table.setValueAt(new MemorySegment(k).getValue(), i, j);
+        for (int i = 1; i < table.getRowCount(); i++) {
+            for (int j = 1; j < table.getColumnCount(); j++) {
+                table.setValueAt(new MemorySegment(k, bitset).getValue(), i, j);
                 k += 32;
             }
         }
     }
+
 
     private class TableRenderer extends DefaultTableCellRenderer {
         @Override
