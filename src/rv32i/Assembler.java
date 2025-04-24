@@ -74,6 +74,10 @@ public class Assembler {
 	 * @param FILE_DIR The file path
 	 */
 	public static void assembleFile(String FILE_DIR) {
+		// Resets processor
+		Compiler.pm = new BitSet(65536);
+		Compiler.mem = new BitSet(65536);
+		Compiler.reg = new int[32];
 		File file = new File(FILE_DIR);
 		int p = 0;
 		try {
