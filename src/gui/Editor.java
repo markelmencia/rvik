@@ -137,9 +137,6 @@ public class Editor extends JFrame {
         RvikMenuItem saveAsFile = new RvikMenuItem("Save As", 0, KeyEvent.VK_A);
         saveAsFile.addActionListener(actionEvent -> saveAsFile());
 
-        RvikMenuItem preferencesFile = new RvikMenuItem("Preferences...", KeyEvent.VK_P, KeyEvent.VK_P); // TODO
-        saveAsFile.setMnemonic(KeyEvent.VK_P);
-
         RvikMenuItem closeFile = new RvikMenuItem("Close", 0, KeyEvent.VK_C);
         closeFile.addActionListener(actionEvent -> close());
 
@@ -148,8 +145,6 @@ public class Editor extends JFrame {
         fileMenu.addSeparator();
         fileMenu.add(saveFile);
         fileMenu.add(saveAsFile);
-        fileMenu.addSeparator();
-        fileMenu.add(preferencesFile);
         fileMenu.addSeparator();
         fileMenu.add(closeFile);
         return fileMenu;
