@@ -200,8 +200,12 @@ public class Editor extends JFrame {
     }
 
     private JMenu getHelpJMenu() {
-        JMenu helpMenu = new JMenu("Help");// TODO
+        JMenu helpMenu = new JMenu("Help");
+        helpMenu.setMnemonic(KeyEvent.VK_H);
+        RvikMenuItem aboutHelp = new RvikMenuItem("About...", 0, KeyEvent.VK_A);
+        aboutHelp.addActionListener(actionEvent -> new About());
 
+        helpMenu.add(aboutHelp);
         return helpMenu;
     }
 
