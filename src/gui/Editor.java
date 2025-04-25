@@ -119,8 +119,7 @@ public class Editor extends JFrame {
         JMenu fileMenu = new JMenu("File");
         fileMenu.setMnemonic(KeyEvent.VK_F);
 
-        RvikMenuItem newFile = new RvikMenuItem("New...", KeyEvent.VK_N, KeyEvent.VK_N); // TODO
-        newFile.addActionListener(actionEvent -> System.out.println("New"));
+        RvikMenuItem newFile = getRvikMenuItem();
 
         RvikMenuItem openFile = new RvikMenuItem("Open...", KeyEvent.VK_O, KeyEvent.VK_O);
         openFile.addActionListener(actionEvent -> {
@@ -148,6 +147,22 @@ public class Editor extends JFrame {
         fileMenu.addSeparator();
         fileMenu.add(closeFile);
         return fileMenu;
+    }
+
+    private RvikMenuItem getRvikMenuItem() {
+        RvikMenuItem newFile = new RvikMenuItem("New...", KeyEvent.VK_N, KeyEvent.VK_N);
+        newFile.addActionListener(actionEvent -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("New File");
+            fileChooser.setApproveButtonText("Create");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+            int result = fileChooser.showSaveDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                file = fileChooser.getSelectedFile();
+            }
+        });
+        return newFile;
     }
 
     private JMenu getEditJMenu() {
