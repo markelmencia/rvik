@@ -1,5 +1,11 @@
 package rv32i;
 
-public class Main {
+import gui.Editor;
 
+import javax.swing.*;
+
+public class Main {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(Editor::new);
+    }
 }

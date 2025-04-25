@@ -112,7 +112,7 @@ public class Compiler {
 			instruction.run();
 			reg[0] = 0; // The first register is hardcoded to 0
 			instructionArray = getInstr();
-		}
+        }
 	}
 	
 	// COMPILER FUNCTIONALITY FUNCTIONS
