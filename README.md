@@ -2,7 +2,7 @@
 A RV32i simulator and assembler programmed in Java.
 
 RV32i is a 32-bit base integer variant for the RISC-V open-source ISA designed by the University of California, Berkeley.
-For more information, be sure to check [their website](https://riscv.org/) or their [instruction set manual.](https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf). This project intends to build an assembler capable of assembling RV32i and a graphical interface to simulate the assembled instructions.
+For more information, be sure to check [their website](https://riscv.org/) or their [instruction set manual](https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf). This project intends to build an assembler capable of assembling RV32i and a graphical interface to simulate the assembled instructions.
 
 ## Helpful resources
 
