@@ -298,7 +298,7 @@ public class Editor extends JFrame {
         Compiler.pc = 0;
         Compiler.run();
         dmTable.init(Compiler.mem);
-        registerTable.refresh();
+        registerTable.init();
     }
 
     private static void setTAreaText(File file) {
