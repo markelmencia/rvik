@@ -22,32 +22,16 @@ public class TypeS extends Instruction {
 		return imm12;
 	}
 
-	public void setImm12(BitSet imm12) {
-		this.imm12 = imm12;
-	}
-
 	public BitSet getRs2() {
 		return rs2;
-	}
-
-	public void setRs2(BitSet rs2) {
-		this.rs2 = rs2;
 	}
 
 	public BitSet getRs1() {
 		return rs1;
 	}
 
-	public void setRs1(BitSet rs1) {
-		this.rs1 = rs1;
-	}
-
 	public BitSet getFunct3() {
 		return funct3;
-	}
-
-	public void setFunct3(BitSet funct3) {
-		this.funct3 = funct3;
 	}
 
 	public TypeS(BitSet imm12, BitSet rs2, BitSet rs1, BitSet funct3) {
@@ -78,7 +62,7 @@ public class TypeS extends Instruction {
 		int rs1 = Utils.btiu(this.rs1);
 		int rs2 = Utils.btiu(this.rs2);
 		int imm12 = Utils.btis(this.imm12, 12);
-		Compiler.storeMem(Compiler.getReg(rs2, size), Compiler.reg[rs1] + imm12);
+		Compiler.storeMem(Compiler.getReg(rs2), Compiler.reg[rs1] + imm12);
 		Compiler.pc = Compiler.pc + 32;
 	}
 

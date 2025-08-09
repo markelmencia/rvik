@@ -12,17 +12,9 @@ public class TypeJ extends Instruction {
 	public BitSet getImm21() {
 		return imm21;
 	}
-	
-	public void setImm21(BitSet imm21) {
-		this.imm21 = imm21;
-	}
-	
+
 	public BitSet getRd() {
 		return rd;
-	}
-	
-	public void setRd(BitSet rd) {
-		this.rd = rd;
 	}
 
 	public TypeJ(BitSet imm21, BitSet rd) {

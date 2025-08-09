@@ -11,7 +11,7 @@ public class TypeImm extends Instruction {
 	private BitSet rs1;
 	private BitSet funct3;
 	private BitSet rd;
-	private BitSet instr30;
+	private final BitSet instr30;
 
 	private static final HashMap<String, Byte> stringToFunct3 = new HashMap<>() {{
 		put("addi", (byte) 0);
@@ -29,32 +29,16 @@ public class TypeImm extends Instruction {
 		return imm12;
 	}
 	
-	public void setImm12(BitSet imm12) {
-		this.imm12 = imm12;
-	}
-	
 	public BitSet getRs1() {
 		return rs1;
-	}
-	
-	public void setRs1(BitSet rs1) {
-		this.rs1 = rs1;
 	}
 	
 	public BitSet getFunct3() {
 		return funct3;
 	}
 	
-	public void setFunct3(BitSet funct3) {
-		this.funct3 = funct3;
-	}
-	
 	public BitSet getRd() {
 		return rd;
-	}
-	
-	public void setRd(BitSet rd) {
-		this.rd = rd;
 	}
 
 	public BitSet getInstr30() {

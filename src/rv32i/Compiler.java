@@ -140,7 +140,7 @@ public class Compiler {
 	/**
 	 * Gets the value of a register up to size
 	 */
-	public static BitSet getReg(int regIndex, int size) {
+	public static BitSet getReg(int regIndex) {
     	int regValue = reg[regIndex];
     	return BitSet.valueOf(new long[]{regValue});
 	}

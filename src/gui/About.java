@@ -47,7 +47,7 @@ public class About extends JFrame {
         JPanel closeButtonPanel = new JPanel();
         JButton closeButton = new JButton("Close");
         closeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        closeButton.addActionListener(actionEvent -> dispose());
+        closeButton.addActionListener(_ -> dispose());
         closeButtonPanel.add(closeButton);
         closeButtonPanel.setBorder(new EmptyBorder(0, 0, 20, 0));
 

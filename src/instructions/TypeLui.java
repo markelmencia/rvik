@@ -12,16 +12,8 @@ public class TypeLui extends Instruction {
 		return imm20;
 	}
 	
-	public void setImm20(BitSet imm20) {
-		this.imm20 = imm20;
-	}
-	
 	public BitSet getRd() {
 		return rd;
-	}
-	
-	public void setRd(BitSet rd) {
-		this.rd = rd;
 	}
 
 	public TypeLui(BitSet imm20, BitSet rd) {

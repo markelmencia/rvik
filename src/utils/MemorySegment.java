@@ -1,18 +1,12 @@
 package utils;
 
-import rv32i.Compiler;
-
 import java.util.BitSet;
 
 public class MemorySegment {
-    private int value;
+    private final int value;
 
     public int getValue() {
         return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
     }
 
     public MemorySegment(int address, BitSet bitset) {

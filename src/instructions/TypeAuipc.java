@@ -1,6 +1,6 @@
 package instructions;
 import java.util.BitSet;
-import utils.Utils;
+
 import rv32i.Compiler;
 
 import static utils.Utils.*;
@@ -13,20 +13,12 @@ public class TypeAuipc extends Instruction {
 	public BitSet getImm20() {
 		return imm20;
 	}
-	
-	public void setImm20(BitSet imm20) {
-		this.imm20 = imm20;
-	}
-	
-	public BitSet getRd() {
+
+    public BitSet getRd() {
 		return rd;
 	}
-	
-	public void setRd(BitSet rd) {
-		this.rd = rd;
-	}
 
-	public TypeAuipc(BitSet imm20, BitSet rd) {
+    public TypeAuipc(BitSet imm20, BitSet rd) {
 		super();
 		this.imm20 = imm20;
 		this.rd = rd;

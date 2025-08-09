@@ -70,7 +70,7 @@ public class Editor extends JFrame {
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
 
         JButton assembleButton = new JButton("Assemble");
-        assembleButton.addActionListener(actionEvent -> assemble());
+        assembleButton.addActionListener(_ -> assemble());
 
         assembleButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         leftPanel.add(assembleButton);
@@ -78,7 +78,7 @@ public class Editor extends JFrame {
 
         runButton = new JButton("Run");
         runButton.setEnabled(false);
-        runButton.addActionListener(actionEvent -> run());
+        runButton.addActionListener(_ -> run());
         runButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         leftPanel.add(runButton);
 
@@ -123,7 +123,7 @@ public class Editor extends JFrame {
         RvikMenuItem newFile = getRvikMenuItem();
 
         RvikMenuItem openFile = new RvikMenuItem("Open...", KeyEvent.VK_O, KeyEvent.VK_O);
-        openFile.addActionListener(actionEvent -> {
+        openFile.addActionListener(_ -> {
             File openedFile = this.openFile();
             if (openedFile != null) {
                 file = openedFile;
@@ -132,13 +132,13 @@ public class Editor extends JFrame {
         });
 
         RvikMenuItem saveFile = new RvikMenuItem("Save", KeyEvent.VK_S, KeyEvent.VK_S);
-        saveFile.addActionListener(actionEvent -> saveFile());
+        saveFile.addActionListener(_ -> saveFile());
 
         RvikMenuItem saveAsFile = new RvikMenuItem("Save As", 0, KeyEvent.VK_A);
-        saveAsFile.addActionListener(actionEvent -> saveAsFile());
+        saveAsFile.addActionListener(_ -> saveAsFile());
 
         RvikMenuItem closeFile = new RvikMenuItem("Close", 0, KeyEvent.VK_C);
-        closeFile.addActionListener(actionEvent -> close());
+        closeFile.addActionListener(_ -> close());
 
         fileMenu.add(newFile);
         fileMenu.add(openFile);
@@ -152,7 +152,7 @@ public class Editor extends JFrame {
 
     private RvikMenuItem getRvikMenuItem() {
         RvikMenuItem newFile = new RvikMenuItem("New...", KeyEvent.VK_N, KeyEvent.VK_N);
-        newFile.addActionListener(actionEvent -> {
+        newFile.addActionListener(_ -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("New File");
             fileChooser.setApproveButtonText("Create");
@@ -170,7 +170,7 @@ public class Editor extends JFrame {
         JMenu editMenu = new JMenu("Edit");
         editMenu.setMnemonic(KeyEvent.VK_E);
         RvikMenuItem undoEdit = new RvikMenuItem("Undo", KeyEvent.VK_Z, KeyEvent.VK_U);
-        undoEdit.addActionListener(actionEvent -> {
+        undoEdit.addActionListener(_ -> {
             try {
                 tArea.getUndoRedoManager().undo();
             } catch (CannotUndoException ignored) {
@@ -179,7 +179,7 @@ public class Editor extends JFrame {
         });
 
         RvikMenuItem redoEdit = new RvikMenuItem("Redo", KeyEvent.VK_Z, KeyEvent.VK_U);
-        undoEdit.addActionListener(actionEvent -> {
+        undoEdit.addActionListener(_ -> {
             try {
                 tArea.getUndoRedoManager().redo();
             } catch (CannotUndoException ignored) {
@@ -189,19 +189,19 @@ public class Editor extends JFrame {
 
 
         RvikMenuItem selectAllEdit = new RvikMenuItem("Select All", KeyEvent.VK_A, KeyEvent.VK_S);
-        selectAllEdit.addActionListener(actionEvent -> {
+        selectAllEdit.addActionListener(_ -> {
             tArea.requestFocusInWindow();
             tArea.selectAll();
         });
 
         RvikMenuItem cutEdit = new RvikMenuItem("Cut", KeyEvent.VK_X, KeyEvent.VK_C);
-        cutEdit.addActionListener(actionEvent -> tArea.cut());
+        cutEdit.addActionListener(_ -> tArea.cut());
 
         RvikMenuItem copyEdit = new RvikMenuItem("Copy", KeyEvent.VK_C, KeyEvent.VK_O);
-        copyEdit.addActionListener(actionEvent -> tArea.copy());
+        copyEdit.addActionListener(_ -> tArea.copy());
 
         RvikMenuItem pasteEdit = new RvikMenuItem("Paste", KeyEvent.VK_V, KeyEvent.VK_P);
-        pasteEdit.addActionListener(actionEvent -> tArea.paste());
+        pasteEdit.addActionListener(_ -> tArea.paste());
 
         editMenu.add(undoEdit);
         editMenu.add(redoEdit);
@@ -219,7 +219,7 @@ public class Editor extends JFrame {
         JMenu helpMenu = new JMenu("Help");
         helpMenu.setMnemonic(KeyEvent.VK_H);
         RvikMenuItem aboutHelp = new RvikMenuItem("About...", 0, KeyEvent.VK_A);
-        aboutHelp.addActionListener(actionEvent -> new About());
+        aboutHelp.addActionListener(_ -> new About());
 
         helpMenu.add(aboutHelp);
         return helpMenu;
