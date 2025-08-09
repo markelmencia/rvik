@@ -27,6 +27,7 @@ public class Editor extends JFrame {
     private final JButton runButton;
     private final MemoryTable pmTable;
     private final MemoryTable dmTable;
+    private final RegisterTable registerTable;
 
     public Editor() {
         setTitle("rvik");
@@ -82,7 +83,7 @@ public class Editor extends JFrame {
         leftPanel.add(runButton);
 
         // Register table
-        RegisterTable registerTable = new RegisterTable();
+        registerTable = new RegisterTable();
 
         JScrollPane tableSP = new JScrollPane(registerTable);
         tableSP.setBorder(new TitledBorder(new EtchedBorder(), "Register values"));
@@ -297,6 +298,7 @@ public class Editor extends JFrame {
         Compiler.pc = 0;
         Compiler.run();
         dmTable.refresh();
+        registerTable.refresh();
     }
 
     private static void setTAreaText(File file) {
