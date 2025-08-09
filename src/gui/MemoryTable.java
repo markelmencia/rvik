@@ -8,11 +8,13 @@ import java.util.BitSet;
 
 public class MemoryTable extends JTable {
 
-    private final BitSet memory;
-
     public MemoryTable(int numRows, int numColumns, BitSet memory) {
-        this.memory = memory;
-        DefaultTableModel model = new DefaultTableModel(numRows + 1, numColumns + 1);
+        DefaultTableModel model = new DefaultTableModel(numRows + 1, numColumns + 1) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         setModel(model);
         getColumnModel().getColumn(0).setPreferredWidth(80);
         setFont(getFont().deriveFont(17F));
@@ -21,7 +23,7 @@ public class MemoryTable extends JTable {
         setTableHeader(null);
         // Initializes values
         setHeaders();
-        refresh();
+        init(memory);
     }
 
     public void setHeaders() {
@@ -33,11 +35,17 @@ public class MemoryTable extends JTable {
         }
     }
 
-    public void refresh() {
+    // Initializes the values of the table according to the provided BitSet
+    public void init(BitSet memory) {
         int k = 0;
         for (int i = 1; i < this.getRowCount(); i++) {
             for (int j = 1; j < this.getColumnCount(); j++) {
-                this.setValueAt(new MemorySegment(k, memory).getValue(), i, j);
+                int value = new MemorySegment(k, memory).getValue();
+                if (value == 0) {
+                    this.setValueAt(0, i, j);
+                } else {
+                    this.setValueAt(String.format("0x%08X", value), i, j);
+                }
                 k += 32;
             }
         }

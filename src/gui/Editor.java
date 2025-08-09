@@ -46,12 +46,12 @@ public class Editor extends JFrame {
         });
 
         // Data Memory Table
-        dmTable = new MemoryTable(110, 10, Compiler.mem);
+        dmTable = new MemoryTable(110, 7, Compiler.mem);
         JScrollPane dmTableSP = new JScrollPane(dmTable);
         dmTableSP.setBorder(new TitledBorder(new EtchedBorder(), "Data Memory"));
 
         // Program Memory Table
-        pmTable = new MemoryTable(110, 10, Compiler.pm);
+        pmTable = new MemoryTable(110, 7, Compiler.pm);
         JScrollPane pmTableSP = new JScrollPane(pmTable);
         pmTableSP.setBorder(new TitledBorder(new EtchedBorder(), "Program Memory"));
 
@@ -84,7 +84,6 @@ public class Editor extends JFrame {
 
         // Register table
         registerTable = new RegisterTable();
-
         JScrollPane tableSP = new JScrollPane(registerTable);
         tableSP.setBorder(new TitledBorder(new EtchedBorder(), "Register values"));
 
@@ -280,7 +279,7 @@ public class Editor extends JFrame {
             try {
                 saveFile();
                 Assembler.assembleFile(file.getPath());
-                pmTable.refresh();
+                pmTable.init(Compiler.pm);
                 runButton.setEnabled(true);
                 JOptionPane.showMessageDialog(null, "The file has been assembled correctly");
             } catch (Exception e) {
@@ -297,7 +296,7 @@ public class Editor extends JFrame {
     public void run() {
         Compiler.pc = 0;
         Compiler.run();
-        dmTable.refresh();
+        dmTable.init(Compiler.mem);
         registerTable.refresh();
     }
 
