@@ -85,7 +85,8 @@ public class Editor extends JFrame {
         // Register table
         registerTable = new RegisterTable();
         JScrollPane tableSP = new JScrollPane(registerTable);
-        tableSP.setBorder(new TitledBorder(new EtchedBorder(), "Register values"));
+        tableSP.setPreferredSize(new Dimension(350, 0));
+        tableSP.setBorder(new TitledBorder(new EtchedBorder(),"Register values"));
 
         setJMenuBar(menuBar);
         add(tabbedPane);
