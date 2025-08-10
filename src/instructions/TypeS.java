@@ -62,7 +62,7 @@ public class TypeS extends Instruction {
 		int rs1 = Utils.btiu(this.rs1);
 		int rs2 = Utils.btiu(this.rs2);
 		int imm12 = Utils.btis(this.imm12, 12);
-		Compiler.storeMem(Compiler.getReg(rs2), Compiler.reg[rs1] + imm12);
+		Compiler.storeMem(Compiler.getReg(rs2, size), Compiler.reg[rs1] + imm12);
 		Compiler.pc = Compiler.pc + 32;
 	}
 

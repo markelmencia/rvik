@@ -140,9 +140,10 @@ public class Compiler {
 	/**
 	 * Gets the value of a register up to size
 	 */
-	public static BitSet getReg(int regIndex) {
+	public static BitSet getReg(int regIndex, int size) {
     	int regValue = reg[regIndex];
-    	return BitSet.valueOf(new long[]{regValue});
+        int mask = (1 << size) - 1;
+    	return BitSet.valueOf(new long[]{regValue & mask});
 	}
 	
 	// Returns the specific instruction object (its type) via the given instruction's code operation.

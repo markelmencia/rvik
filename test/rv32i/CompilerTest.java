@@ -129,7 +129,7 @@ public class CompilerTest {
         for (int i = 0; i < 4; i++) {
             bitSet.set(i);
         }
-        assertEquals(bitSet, Compiler.getReg(2));
+        assertEquals(bitSet, Compiler.getReg(2, 4));
     }
 
     @Test
