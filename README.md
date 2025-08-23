@@ -80,4 +80,4 @@ Other than the Unit Tests, **three RV32i scripts** can be found in the `test/` d
 - The RISC-V assembler and simulator I used before this one, by Benjamin Landers (TheThirdOne): https://github.com/TheThirdOne/rars
 
 ## License
-This repository follows the GNU General Public License (GPLv3). Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed. For more information, refer to the Free Software Foundation website or read `LICENSE`.
+This repository follows the GNU General Public License (GPLv3). Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed. For more information, refer to the [Free Software Foundation website](https://www.fsf.org/) or [read the license](LICENSE).
